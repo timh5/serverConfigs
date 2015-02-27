@@ -1,0 +1,4 @@
+defscrollback 5000
+escape ^Zz
+shell -$SHELL
+altscreen on

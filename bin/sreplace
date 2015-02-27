@@ -1,0 +1,157 @@
+#!/bin/sh
+# Interactive search replace in multiple files
+# Author: timh@vyew.com
+#   - prompts you before replacing in files
+#	- makes a backup to .srbak file
+#
+# 	Known Issues:
+#		- Cant have spaces in search replace text
+#
+#
+#	Todo: 
+#		- allow spaces in search/repl text
+#		- allow search replace across mutli lines 
+
+if [ "$1" == "" ];then
+	me=`basename $0`
+	echo "Usage: $me [options] 'regex_search' 'regex_replace' files..."
+	echo "Usage: $me [options] 'regex_search' 's|regex_search|regex_replace|' files..." 
+	echo "	    NOTE: Must escape regex_search, eg '1 users(s)' should be '1 user\\(s\\)'"
+	echo "		-r = Recurse into subdirs"
+	echo "		-f = force changes, no interactive mode"
+	echo "		-n = dont make backup files"
+	echo "		-t = test mode - only display possible changes"
+	#echo "		-e = Auto escape regex_searc"
+	echo "Examples:"
+	echo '		sreplace "\$this->isValid\(\$arg\)" "globalIsValid($arg)"'
+	exit;
+fi
+
+## --- Parse options, if any
+OPT_BACKUP=1;
+ORIG_OPTS="-";
+while getopts "tnqerRfB" flag;do
+   case $flag in
+    f)  OPT_FORCE=1; ORIG_OPTS="${ORIG_OPTS}f";;
+    r|R)  OPT_RECURSE=1; ORIG_OPTS="${ORIG_OPTS}r";;
+    t)  OPT_TEST=1; ORIG_OPTS="${ORIG_OPTS}t";;
+	n)  OPT_BACKUP=0; ORIG_OPTS="${ORIG_OPTS}n";;
+	q)	OPT_QUIET=1; ORIG_OPTS="${ORIG_OPTS}q";;
+	e)
+   esac
+done
+[ "$ORIG_OPTS" == "-" ] && ORIG_OPTS="";
+shift $(($OPTIND - 1))
+
+
+## --- Define search/repl params, and escape forward slashes
+search=`echo $1|sed 's|/|\\\/|g'`
+repl=`echo $2|sed 's|/|\\\/|g'`
+## --- Check if repl is a literal string, or a full regex cmd ("s/xxx/yyy")
+#$tmp=`echo '$repl'|egrep '^s[\/|]'`
+#if [ $? == 0 ]; then IS_FULL_REGEX=1;
+#else IS_FULL_REGEX=0; fi;
+IS_FULL_REGEX='';
+
+## --- Check if has "\1" in regex_replace
+tmp=`echo $repl|egrep '\\' 2>/dev/null`
+E1=$?
+tmp=`echo $repl|egrep '1'`
+if [ $? == 0 ] && [ $E1 == 0 ];then 
+	HAS_VAR_IN_REPL=1;
+#	GREP_REPL=`echo "$repl"|sed -E 's|\\1|.*?|g'`
+else HAS_VAR_IN_REPL=''; fi;
+HAS_VAR_IN_REPL=1;
+
+## -- take out back references in repl for grep
+#GREP_REPL=`echo "$repl"|sed -E 's|\1|.*?|g'`
+#echo $HAS_VAR_IN_REPL;
+#echo "$GREP_REPL"
+#exit
+
+shift;
+shift;
+echo "Search: $search, Replace: $repl"
+
+
+##################################################
+## --- Define main search repl function
+## Usage: doSR filename
+function doSR 
+{
+		CNT=`egrep "$search" $1 -c`
+		if [ $? == 0 ] && [ $CNT -gt 0 ];then
+			## FOUND A MATCH, show match, and what replace will look like
+			echo "FILE:$1 -- $CNT match(es) found";
+			egrep "$search" $1 | sed  's/^[ \t]*/      /' | egrep "$search" --colour
+			echo "   REPLACEMENTS:"
+			if [ $IS_FULL_REGEX ]; then
+				sed -n -r "${repl}p" $1 | sed 's/^[ \t]*/      /' 
+			else 
+				if [ "$HAS_VAR_IN_REPL" ];then
+					sed -n -r "s/$search/$repl/gp" $1 | sed 's/^[ \t]*/      /' 
+				else
+					sed -n -r "s/$search/$repl/gp" $1 | sed 's/^[ \t]*/      /' | egrep "$repl" --colour
+				fi;
+			fi; 
+	
+			[ $OPT_TEST ] && shift && continue;
+	
+			if [ ! $OPT_FORCE ];then
+				## GET USER CONFIRMATION
+				choice=9;
+				while [ "$choice" != "n" ] && [ "$choice" != "y" ]; do
+                    read -n1 -p"Replace all in file? [Y/n/all]" choice
+                    choice=`echo $choice|tr A-Z a-z`;
+                    [ "$choice" == "" ] && choice=y;
+					[ "$choice" == "a" ] && OPT_FORCE=1 && choice=y;
+                    echo ""
+				done
+			fi
+
+			if [ $OPT_FORCE ] || [ "$choice" == "y" ]; then
+				## Do the replace
+				[ $OPT_BACKUP ] && cp -f $1 $1.srbak
+				if [ "$IS_FULL_REGEX" ]; then
+					sed "$repl" $1 -i;	
+				else
+					sed "s/$search/$repl/g" $1 -i;
+				fi;
+				if [ $? == 0 ];then echo "Replaced.";
+				else echo "*** ERROR REPLACING"; fi;
+			fi 	
+		fi
+}
+
+
+
+## --- Loop through all files passed
+while [ $1 ];do
+	## Disregard .srbak files
+	TMP=`echo $1|egrep '.srbak$'`
+	[ $? == 0  ] && shift && continue;
+
+	if [ $? != 0  ];then  
+		## If directory, recurse into it
+		if [ -d $1 ] && [ $OPT_RECURSE ];then 
+			$0 $ORIG_OPTS $search $repl $1/*
+		elif [ -s $1 ]; then
+	 		doSR $1
+		fi
+	fi
+	shift;
+done
+
+exit
+
+
+
+	[ "$3" == "" ] && set 3="*"
+	echo grep -lEre "$1" $3 
+else
+	[ "$3" == "" ] && 3="*"
+	grep -lEre "$1" $3 | xargs -d '\n' sed -i.srbak -r "$2" 
+	echo "Files affected:"
+	ls *.srbak
+fi
+

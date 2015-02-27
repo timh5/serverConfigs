@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$1" -gt 0 ];then
+	tail -n $1 /var/log/php.log
+else
+	tail /var/log/php.log
+fi
+echo -ne "\n\n\n\n\n"
+echo -ne "----------------------------------------------------\n"
+echo -ne "\n\n\n\n\n"
+tail -f -n0 /var/log/php.log
+

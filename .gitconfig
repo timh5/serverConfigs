@@ -1,0 +1,45 @@
+[user]
+	name = timh
+    email = tim@email.com
+[core]
+        autocrlf = false
+        safecrlf = false
+        compression = 9
+[repack]
+        UseDeltaBaseOffset = true
+[alias]
+        co = checkout
+        br = branch
+		
+		# To make this work run this first:
+		# cp /opt/vyew/bin/git-branch-descriptions /usr/bin/
+		brd = branch-descriptions
+		bre = branch --edit-description
+
+		bra = branch -a 
+        ci = commit
+        cia = commit -a
+		diffs = diff --staged 
+       	com = commit
+        st = status
+        unstage = reset HEAD --
+        last = log -1 HEAD
+		logs = log --stat --summary
+        changes=diff --name-status -r
+        diffstat=diff --stat -r
+        graph = log --graph --abbrev-commit --pretty=oneline --decorate
+		cpick = cherry-pick
+		cpk = cherry-pick
+
+[color]
+	status = always
+        branch = auto
+        interactive = auto
+        diff = auto
+        grep = auto
+        showbranch = auto
+        ui = auto
+
+[rerere]
+	autoupdate = true
+	enabled = true

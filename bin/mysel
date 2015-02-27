@@ -1,0 +1,34 @@
+#!/bin/sh
+# mysql select helper
+
+if [ ! $1 ];then
+	echo "Usage: mysel PASS COLS TABLE ID_VALUE"
+	echo "For all cols, use 'a' instead of *"
+	exit 1
+fi
+
+PW=$1;
+SELCOLS=$2;
+TBL=$3;
+IDVAL=$4;
+IDNAME="id";
+
+[ "$SELCOLS" == "a" ] && SELCOLS="*"
+
+case `hostname` in
+	www.dev.vyew.com)
+		DBHOST=dbwrite;;
+	*)
+		DBHOST=dbwrite;;
+esac
+
+TBL_NAME_IDS=",accounts,adserve,affiliate_users,brands,cakes,cobrands,collections,coupons,drawings,emusic,layers,login_fails,old_passwords,packages,selftests,users,"
+
+tmp=`echo "$TBL_NAME_IDS" | grep ",$TBL," `
+if [ $? == 0 ]; then
+	## Strip of last "s", add "id"
+	IDNAME="${TBL/%s/}id"
+fi
+
+mysql -p$PW -h$DBHOST vyew -sNe "select $SELCOLS from $TBL where $IDNAME=$IDVAL"
+

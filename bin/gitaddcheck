@@ -1,0 +1,32 @@
+#Return total size of files to be added to git in current directory
+if [ "$1" == "st" ]; then
+	echo "To be added (bytes):"
+	git status|grep 'new file'|awk '{print $4}'  \
+		| sed -r 's/ /\\ /g'|xargs ls -l|awk '{t+=$5}END{print t}'
+	exit
+fi
+
+echo "Dry run add in this dir (bytes):"
+
+## The paths generated from git add -n are hard refs... such as  "a/b/c/filename"
+## even though your current dir might be a/b/.
+## so we need to find the removepath to remove from the "a/b/c/filename"
+## in this example it is "a/b/"
+
+testpath=`git add . -n|head -n1|sed -r "s/add ?'?([^']+).*/\1/"`
+removepath=""
+while [ 1 ]; do
+	dir=`echo $testpath|awk 'BEGIN{FS="/"};{print $1}'`
+	testpath=`echo $testpath|sed -r "s/$dir.//"`
+
+	#check if dir inside PWD
+	x=`echo $PWD|grep "$dir"`
+	if [ $? == 0 ];then
+		removepath=`echo "${removepath}$dir/"`
+	else
+		break
+	fi
+done
+
+
+git add . -n |sed -r "s#add..$removepath([^']+)'#\1#"|sed -r 's/ /\\ /'|xargs ls -l|awk '{t+=$5}END{print t}'

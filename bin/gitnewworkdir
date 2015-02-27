@@ -1,0 +1,28 @@
+#!/bin/sh
+HT=/data/vhosts/vyew.com/httpdocs
+
+if [ "$1" == "" ];then
+	echo "Usage: gitnewworkdir [new_version_dir]"
+	exit 255
+fi
+
+if [ -e "$HT/$1" ];then
+	echo "$HT/$1 already exists!!"
+	exit 255
+fi
+
+
+# get base repo... its gonna be either v4.00 or v4.01 
+if [ -e $HT/v4.00 ]; then
+	BASE="v4.00"
+elif [ -e $HT/v4.01 ];then
+	BASE="v4.01"
+else
+	echo "cant find base repository to clone!"
+	exit 255
+fi
+
+cd $HT
+git-new-workdir $BASE $1 dev_deploy
+chown apache.apache $1 -R
+

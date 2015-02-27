@@ -1,0 +1,4 @@
+#!/bin/sh
+
+git status --porcelain|grep '^ M'|grep swf$|awk '{print $2}'|xargs git add -u 
+

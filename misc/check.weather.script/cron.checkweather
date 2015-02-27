@@ -1,0 +1,1 @@
+0 7  * * * root /usr/bin/php /root/svn.tim/check.weather.scriptcheckweather.php  > /dev/null 2>&1

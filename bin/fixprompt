@@ -1,0 +1,3 @@
+#!/bin/sh
+export PS1="[`hostname|sed -r 's/(www.|.com)//g'`:\W] "
+echo 'export PS1="[`hostname|sed -r \"s/(www.|.com)//g\"`:\W] "'

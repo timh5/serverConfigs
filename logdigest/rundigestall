@@ -1,0 +1,204 @@
+#!/bin/sh
+#Processes a bunch of log files that are listed in a config file,
+#then emails a notification
+#Usage: ./rundigestall <config.file> [--help|--norotate|--nostamp]
+
+#TODO: add stamp to end of log file after process, then next process check for last stamp,
+#      and only process after that.
+
+
+################################################# Sample config file:
+#SERVERID="web1-parent"
+#ALERTEMAILS=""
+#LOGS=( log1 log2 log3 )
+#ROTATE=( logtorotate1 logtorotate2 )
+
+
+################################################# DEFAULT CONFIGURATION
+ALERTEMAILS="timh@vyew.com"
+DIGEST_DEST_DIR="/tmp/logdigests"
+MYDIR=`dirname $0`
+cd $MYDIR
+
+LOGDIGEST_COMMAND="$MYDIR/logdigest"  
+LDCONDENSE_FILE="$MYDIR/conf/ldcondense.conf"
+
+MAX_LOG_SIZE=5000000
+TRIM_LEN=30000
+
+
+
+
+##################################################### Sort out args 
+
+CFGFILE=$1;
+if [ "${CFGFILE:0:1}" == "-" ] || [ "$CFGFILE" == "" ];then
+	hn=`hostname`;
+	CFGFILE="conf/$hn.conf";
+else
+	shift;
+fi
+
+
+#CHeck if file is relative, or absolute
+if [ "${CFGFILE:0:1}" != "/" ];then
+	CFGFILE="$MYDIR/$CFGFILE"
+fi
+echo $CFGFILE
+if [ -f "$CFGFILE" ]; then 
+	source $CFGFILE;
+	args="$1 $2 $3 $4";
+	NOROTATE=`echo $args | grep '\-\-norotate'`
+	NOSTAMP=`echo $args | grep '\-\-nostamp'`
+	BACKSTAMP=`echo $args | grep '\-s[0-9]' | sed -r 's/.*-s([0-9][0-9]?).*/\1/'`
+	if [ ! $BACKSTAMP ];then BACKSTAMP=1; fi
+else
+	echo "Digest Logs - digests all logs in given config file"
+	echo "Usage: $0 [config file] [-sN|--norotate|--nostamp]"
+	echo "			------"
+	echo "			Default config file is conf/<hostname>.conf"
+	echo ""
+	echo "			Logs not rotated, are stamped at the end so that digests"
+	echo " 			only contain new log material, use -sN to show more:"
+	echo ""
+	echo "			-sN			show back to N stamps. Default is 1."
+	echo "						-s0 to ignore stamps, and show all"
+	echo "			--nostamp	dont stamp any logs"
+	echo "			--norotate	dont rotate any logs"
+	exit 1;
+fi
+
+
+
+
+
+
+####################################################33
+#FUNCTIONS
+
+
+#Purpose:   Delete files older then X days.
+#Usage:     deloldfiles 5 "/mydir/dir2/filesomething.*"   #deletes 5 day old files
+#           deloldfiles 14 "/mydir/*"                   #deletes 2 week old files
+deloldfiles()
+{
+    dayold=$1
+    filelist=$2
+    if [ {$filelist} ]; then
+        #delete old logs
+        for delfile in "$( /usr/bin/find $filelist -type f -mtime +$dayold )"; do
+            /bin/rm -f $delfile
+        done
+    else
+        echo "deloldfiles not used correctly. Usage: deloldfiles days \"filemask\""
+    fi
+}
+
+#Usage: rotatelog filename
+trotatelog() 
+{
+        rfile=$1
+        echo "ROTATING LOG: $rfile"
+        if [ -f $rfile ]; then
+                #backup log
+                cp $rfile $rfile.rotate.$bdate -v
+                echo "" > $rfile
+
+                #delete old logs
+                deloldfiles 5 "$rfile.rotate.*"
+                deloldfiles 1 "$rfile.ld.*"
+        fi
+}
+
+
+
+######################################################
+######################################################
+######################################################
+# MAIN
+#
+
+bdate=`/bin/date +%Y%m%d-%H%M`
+mkdir -p $DIGEST_DEST_DIR
+dfile="$DIGEST_DEST_DIR/logdig.$bdate"
+tmpdir="$DIGEST_DEST_DIR/$SERVERID"
+mkdir -p $tmpdir
+echo "" > $dfile
+
+#get current live version of vyew
+#LIVEVERSIONVAR=$(cat $PATH_TO_VYEWROOT/version2.php | grep "\$vers" | sed -r 's/.*"(.*)".*/\1/')
+
+
+## Process Logs
+
+	dstamp=`date +%Y%m%d-%H%M-%S`
+	dstamp="### LogDigested to here on $dstamp ###"
+
+    for file in ${LOGS[*]}; do
+        if [ $(expr length $file) -lt 3 ]; then continue; fi
+        #echo $LIVEVERSIONVAR
+        #file=$(echo $file | sed "s/{LIVEVERSION}/$LIVEVERSIONVAR/")
+
+        echo "Processing: $file"; 
+
+		if [ -f $file ]; then
+			procfile=`echo $file | sed 's/\//./g'`
+			procfile=$tmpdir/tmp.$procfile
+
+			## Check if file too big, chop it
+			sz=`ls -l $file | awk '{print $5}'`
+			if [ $sz -gt $MAX_LOG_SIZE ]; then
+				tail -n$TRIM_LEN $file > $procfile
+			else
+				cat $file > $procfile	
+			fi
+
+            ## Get line number of last stamp
+			if [ "$BACKSTAMP" == "0" ]; then
+				PLINE=1;
+			else
+            	PLINE=`cat $procfile | grep '### LogDigested' -n | tail -n$BACKSTAMP | head -n1 | sed -r 's/([0-9]*):.*/\1/'`
+            	if [ ! $PLINE ];then PLINE=1; fi
+				sed -n -e "$PLINE,9999999999999p" $procfile -i
+			fi
+			
+
+			echo "----- START LOG: $file -----" | tee -a $dfile
+            echo $LOGDIGEST_COMMAND $procfile $LDCONDENSE_FILE -s  | egrep -v '[123]:' |sort -nr|head -n20 | tee -a $dfile
+			echo "----- END LOG: $file -----" | tee -a $dfile
+            echo "////////////////////////////////////////////////////////" | tee -a $dfile
+            echo ""  | tee -a $dfile
+	
+			## Add stamp to end of log if necessary
+			if [ ! "$NOSTAMP" ]; then
+				echo $dstamp >> $file
+			fi		
+	
+		fi
+    done
+
+
+## Rotate Logs
+
+    if [ ! "$NOROTATE" ]; then
+		for file in ${ROTATE[*]}; do
+			echo "Rotating: $file" | tee -a $dfile
+        	trotatelog $file
+		done
+	fi
+
+
+#--- Process special cases
+#tail /opt/unity/log.txt -n500 > /opt/unity/log.txt.daily
+#$LOGDIGEST_COMMAND /opt/unity/log.txt.daily  | tee -a $dfile
+#echo "///////////////////////////////////////////////////////////" | tee -a $dfile
+#echo ""  | tee -a $dfile
+
+#echo -e "\nTo further condense logs, edit: ~/tim/logdigest/ldcondense.conf\n"
+
+#email the digest
+lcon=`cat $dfile`
+echo -e "Subject:[$SERVERID] Log Digest $bdate \n $lcon" | /usr/sbin/sendmail $ALERTEMAILS
+
+deloldfiles 14 "$DIGEST_DEST_DIR/*"
+

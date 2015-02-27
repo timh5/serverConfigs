@@ -1,0 +1,37 @@
+# create from scratch
+screen 
+
+
+screen -r 	= reattach to previous screen
+
+
+## How to remote view/share a shell session
+Login as same user
+user1: screen -S root
+Ctrl-A, :multiuser on
+
+user2: screen -x root
+
+
+
+
+## Scrollback mode
+Ctrl-a, [  	= go into scrollback mode
+Ctrl-u/d   	= page up/down
+/			= search
+
+
+
+Ctrl-a, c 	= create window
+Ctrl-a, n	= where n is window number
+Ctrl-a, Ctrl-a = to prev window
+Ctrl-a, " 	= list windows
+
+
+
+## Split screen
+Ctrl-a, S 	= horizontal
+Ctrl-a, |	= vertical
+Ctrl-a, :remove	= remove screen
+Ctrl-a, tab		= next screen region
+

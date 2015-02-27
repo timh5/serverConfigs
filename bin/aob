@@ -1,0 +1,179 @@
+#!/bin/sh
+#Auto Obfu v1.2
+#
+#   	1/2/08 	- [add] checks for sim_obfu signature in file to tell if its been obfu'd or not
+#		  [fix] checks twice if branch error, since a file could have more then one
+#	7/11/07	- [add] checks if file has already been obfu'd. if so, then skips 
+#
+
+####### Dependancies #############
+#The following must be in exec path, or specify it directly
+#D_REBRANCH=/usr/local/bin/rebranch
+D_DIR=/root/svn.tim/obfu
+D_REBRANCH=$D_DIR/rebranch
+D_FIXBRANCH=$D_DIR/fixbranch.php
+D_FLASM=$D_DIR/flasm
+DEFAULT_FLASM_INI=$D_DIR/flasm.ini
+D_PHP=/usr/bin/php
+LOGFILE=aob.log
+D_EXIST=true
+[ -f $D_FLASM ] || ( echo "Missing: $D_FLASM"; D_EXIST=false; )
+[ -f $D_REBRANCH ] || ( echo "Missing: $D_REBRANCH" && D_EXIST=false; )
+[ -f $D_FIXBRANCH ] || ( echo "Missing: $D_FIXBRANCH" && D_EXIST=false; )
+[ -f $D_PHP ] || ( echo "Missing: $D_PHP" && D_EXIST=false; )
+[ $D_EXIST == false ] && exit;
+
+[ -f flasm.ini ] || cp $DEFAULT_FLASM_INI .
+
+C_PROC=0; C_OK=0; C_ERR=0; C_TRYCAT=0; C_FIXBR=0; C_ALREADY=0;
+C_ERRFILES="";
+
+if [[ "$1" == "" ]]; then
+	echo "Purpose: Obfuscates given swf file(s)."
+	echo "       : Fixes 'branch too far' errors and recompiles"
+	echo "  Usage: aob [file(s)]   - Obfuscates files"
+	echo "       : aob delete [-f] - deletes all backup/flm files (.\$wf, .flm, .ob)"
+	echo "       :                    - (-f) force - wont ask to confirm"
+	echo ""
+	echo "Example: aob *.swf"
+	echo "       : aob simmeeting.swf"
+	echo "       : aob unset a.swf b.swf c.swf"
+	exit
+fi
+
+if [[ "$1" == "delete" ]]; then
+	if [[ "$2" == "-f" ]]; then
+		TMP="y"
+	else
+		echo -n "Delete all files: (*.\$wf, *.flm, *.ob) [y/N]?:"
+		read TMP
+	fi
+	if [[ "$TMP" == "y" ]]; then
+		rm *.\$wf
+		rm *.flm
+		rm *.ob
+		echo "Deleted."
+	else
+		echo "Not Deleted"
+	fi
+	exit
+fi
+
+echo "">$LOGFILE
+
+for i in $*; do
+	C_PROC=`expr $C_PROC + 1`	
+
+	echo -n Decompiling $i... >>$LOGFILE
+	echo -n -e "$i\n\t\t\t\t";
+
+	$D_FLASM -d $i > $i.flm 2>log
+
+	#Check obfu signature exists "sim_obfu"
+	if grep 'sim_obf' $i.flm 1>/dev/null; then
+		echo "Already Obfu'd!"  >>$LOGFILE
+		echo -e "OK\tAlready Obfu'd"
+		C_OK=`expr $C_OK + 1`
+		C_ALREADY=`expr $C_ALREADY + 1`		
+		continue
+	fi	
+	
+
+	cat log|grep -v flasm.ini  >>$LOGFILE
+	echo Obfuing $i  >>$LOGFILE
+	$D_REBRANCH $i.flm $i.ob >> /dev/null 2>&1
+	if [ -f $i.ob ]; then 
+		$D_FLASM -a $i.ob 2>log 
+	else
+		echo "Error in rebranch :: $i.ob does not exist"  >>$LOGFILE
+		C_ERR=`expr $C_ERR + 1`
+		C_ERRFILES="$C_ERRFILES $i"
+		continue
+	fi
+
+	cat log  >>$LOGFILE
+
+	if grep 'successfully assembled' log 1>/dev/null; then
+		echo "OK"
+		C_OK=`expr $C_OK + 1`
+	else
+
+
+		#If error is because branch too far, then auto-correct it
+		if grep 'too far away from branch' log >/dev/null; then
+			echo "FIXING 'Branch Too Far' ERROR"  >>$LOGFILE
+			ERRLINE=$(grep -E 'Line [0-9]* of.*swf' log -o | awk '{print $2}')
+			FLMFILE=$(grep -E 'Line [0-9]* of.*swf.*[^:]' log -o | awk '{print $4}')
+			ERRLABEL=$(grep -E 'away from branch.*' log -o | awk '{print $4}')
+			echo "calling $D_FIXBRANCH  ERRLABLE:$ERRLABEL, ERRLINE:$ERRLINE, FLM:$FLMFILE"  >>$LOGFILE
+			$D_PHP $D_FIXBRANCH $FLMFILE $ERRLABEL $ERRLINE 2> /dev/null
+		
+			if [ -f $i.ob ]; then
+				$D_FLASM -a $FLMFILE 2>log 
+			else
+				echo "ERROR:RE-COMPILE :: $FLMFILE does not exist" >>$LOGFILE
+				C_ERR=`expr $C_ERR + 1`				
+				C_ERRFILES="$C_ERRFILES $i"
+			fi
+
+			#ANOTHER Branch error.... try fixing it one more time
+			if grep 'too far away from branch' log >/dev/null; then
+            	echo "FIXING 'Branch Too Far' ERROR"  >>$LOGFILE
+            	ERRLINE=$(grep -E 'Line [0-9]* of.*swf' log -o | awk '{print $2}')
+            	FLMFILE=$(grep -E 'Line [0-9]* of.*swf.*[^:]' log -o | awk '{print $4}')
+            	ERRLABEL=$(grep -E 'away from branch.*' log -o | awk '{print $4}')
+            	echo "calling $D_FIXBRANCH  ERRLABLE:$ERRLABEL, ERRLINE:$ERRLINE, FLM:$FLMFILE"  >>$LOGFILE
+            	$D_PHP $D_FIXBRANCH $FLMFILE $ERRLABEL $ERRLINE 2> /dev/null
+				$D_FLASM -a $FLMFILE 2>log 
+			fi
+
+
+            if grep 'successfully assembled' log 1>/dev/null; then
+                echo "RE-COMPILE Successfull"  >>$LOGFILE
+                C_OK=`expr $C_OK + 1`
+                echo -e "OK\tFixed branch"
+                C_FIXBR=`expr $C_FIXBR + 1`
+                continue
+			else
+				echo "Re-compile failed"  >>$LOGFILE
+        		if grep 'catch' log >/dev/null; then
+					echo -e "ERROR\tRecompile Fail. Has Try/Catch."
+					C_TRYCAT=`expr $C_TRYCAT + 1`
+				else
+					echo -e "ERROR\tRecompile Fail. See $LOGFILE"	
+				fi
+				C_ERR=`expr $C_ERR + 1`
+				C_ERRFILES="$C_ERRFILES $i"
+				cat log  >>$LOGFILE
+			fi
+		
+
+
+		#If try catch error...
+        elif grep 'catch' log >/dev/null; then
+            echo -e "ERROR\tHas try/catch"
+            C_ERR=`expr $C_ERR + 1`
+            C_TRYCAT=`expr $C_TRYCAT + 1`
+            C_ERRFILES="$C_ERRFILES $i"
+
+		#Other Error		
+		else
+			echo "::OTHER ERROR::"  >>$LOGFILE
+			echo -e "ERROR\t"
+			C_ERR=`expr $C_ERR + 1`
+			C_ERRFILES="$C_ERRFILES $i"
+			cat log  >>$LOGFILE
+		fi
+
+	fi
+done
+
+echo "$C_PROC processed"
+echo "$C_OK Successful ($C_FIXBR fixed branches, $C_ALREADY already Obfu'd)"
+echo "$C_ERR Errors ($C_TRYCAT Try/Catch errors)"
+echo "Files not obfu'd: $C_ERRFILES"
+echo "REMEMBER: to "aob delete" to remove old temp files!!!"
+
+rm -f log
+
+

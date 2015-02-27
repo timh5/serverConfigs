@@ -1,0 +1,20 @@
+#!/bin/sh
+# Copy a branch from one remote to another
+# Usage gitcpbr src_remote dest_remote branch
+if [ "$2" == "" ];then
+	echo "Usage: gitcpbr branch dest_remote [src_remote=origin]"
+	exit 255
+fi
+
+SRC=$3
+DEST=$2
+BR=$1
+
+if [ "$SRC" == "" ];then
+	SRC="origin"
+fi
+
+#[sub8:deskshare.git]git push codeplane remotes/origin/dave:refs/heads/dave
+
+git push "$DEST" remotes/$SRC/$BR:refs/heads/$BR
+

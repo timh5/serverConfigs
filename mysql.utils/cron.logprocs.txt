@@ -1,0 +1,6 @@
+
+#Log long queries, and send them to nagios
+* * * * *       root /bin/sh /opt/vyew/mysql.utils/logprocs.sh
+*/15 * * * *    root /usr/bin/scp /var/log/mysqlprocs.log dev.vyew.com:/etc/nagios/www/web1.mysqlprocs.log
+
+

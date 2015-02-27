@@ -1,0 +1,4 @@
+
+
+*/5 * * * * root /bin/sh /opt/vyew/bin/chkCpuHog dev7.vyew.com
+

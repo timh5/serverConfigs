@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+use Text::TabularDisplay;
+my $t = Text::TabularDisplay->new(qw(. Branch Description));
+
+$output= `git branch`;
+foreach my $line (split(/^/, $output)) {
+    my ($is_current, $name) = split(/\s+/, $line);
+    my $description = `git config branch.$name.description`;
+    $description =~ s/\s+$//;
+
+	$t->add($is_current, $name, $description);
+}
+
+print $t->render;
+print "\n";
+

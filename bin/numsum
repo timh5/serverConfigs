@@ -1,0 +1,17 @@
+#!/bin/sh
+# Sum together numbers piped in
+# Usage: cat list.of.numbers | numsum <column#>
+# prints total of that column
+
+
+TOT=0;
+while read line; do
+	if [ $1 ];then
+		awkopt=`echo -ne 'print $'; echo $1`
+		line=`echo $line|awk "{$awkopt}"`
+	fi
+	TOT=`expr $TOT + $line`	
+done
+
+echo $TOT;
+

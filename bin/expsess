@@ -1,0 +1,7 @@
+#!/bin/sh
+
+pw=$1
+sid=$2
+
+mysql -p$pw vyew -hdbwrite -sNe "update sessions set expireDate = utc_timestamp() where sessionid='$sid'"; 
+

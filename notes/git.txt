@@ -1,0 +1,105 @@
+## Make new branch on local, then push it to remote
+git br newBranch
+git push origin newBranch:newBranch
+
+## To make a clean branch without ancestry
+git symbolic-ref HEAD refs/heads/newbranch
+rm .git/index
+git clean -fdx
+
+
+
+## Remove a remote branch
+git push origin :branchname
+
+## Remove the remote master branch and point head at something else
+git remote set-head origin <otherBranchName>
+git push origin :master
+
+
+## show remote repository url
+$ git remote -v
+origin	git://github.com/schacon/ticgit.git
+
+## Add a remote repo
+$ git remote add alias url/to/repo
+
+## Pull down repo info (doesnt affect working tree)
+$ git fetch repo_alias 
+$ git fetch origin
+
+##
+
+## push changes up
+$ git push repo branch
+$ git push origin master
+
+## get changes down
+$ git pull 
+$ git pull repo branch
+
+## update local repo
+$ git reset --hard
+
+## Important point: Must pull down changes from origin,
+## before pushing, if something had changed there.
+$ git pull
+... resolve conflicts if any, commit,
+$ git push origin master
+
+## see all branches, local and remote
+$ git br -a
+
+## Get local branches and remote branches exist simultaneously, 
+## remotes are just pointer, to link your
+## local branch to a remote:
+$ git checkout -b newbranch origin/somebranch
+$ git checkout --track origin/somebranch
+
+
+## to push changes of a linked branch up to server
+$git push origin localnewbranch:nameofserverbranch 
+
+## to push a whole branch up to server
+$ git push origin localnewbranch
+
+
+## Making a new remote repo
+## On server:
+mkdir /git/repo; cd /git/repo
+git init --bare
+cd ..; chown git.git repo -R
+
+## On client
+mkdir x; cd x
+git init; >x; git add x; git ci -mm -a;   #create base repo
+git remote add origin ssh://git@office.simulat.com/git/repo
+git push origin master
+
+#how to install git
+SEE /opt/vyew/notes/install.git.txt
+
+
+###### HOW TO REBASE A SECTION OF COMMITS IN ONE BRANCH TO ANOTHER (NOT A MERGE) ##########
+## THIS IS APPLYING A SECTION OF COMMITS TO A NEW BRANCH
+## Example: rebase from v4.01 to v3.86
+##  
+on local machine git pull
+in gitbash: gitk origin/<DEST_BRANCH> origin/<FROM_BRANCH>
+#check out vOLD and make branch new_vNEW (ie. new_v4.01 at v3.86)
+#check out vNEW and make branch old_vNEW (ie. old_v4.01 on v4.01)
+#make tag at the last rebase point, in this case "beforeFilter" commit... it will rebase after that tag
+
+#checkout new_vNEW
+
+#get commits from tag to new_4.01 and move onto old_v4.01
+git rebase -i --onto old_v4.01 rebased_to_here_from_401_to_386 new_4.01
+
+#if conflict
+git mergetool -y && git rebase --continue
+
+#after done, push to orig v4.01_deploy branch
+git push origin new_401:v4.01_deploy
+
+
+

@@ -1,0 +1,70 @@
+#
+#
+#	IMPORTANT: AFTER EDITING THIS FILE, PLEASE CHECK IT IN
+#   cp www.dev.cron /root/sysutils/crons/
+#   svn ci -m"updated Cron" /root/sysutils/crons/
+#
+# 
+
+#Vyew Comment Subscriptions
+#*/5 * * * * root /usr/bin/php /data/vhosts/vyew.com/httpdocs/v4.46/cgi/services/Notify.php process
+
+# Run the mail bouncer
+*/3 * * * * 	root 	/bin/sh /data/vhosts/vyew.com/httpdocs/bouncer/runBouncer.sh
+
+*/5 * * * * root date > /tmp/dt
+
+# Adams diffs againts master branch
+#*/30 * * * *  root /bin/sh  /data/vhosts/vyew.com/httpdocs/tim/branches/diffall.sh
+
+#logdigest at 4:30am
+#39 4 * * * root /bin/sh /opt/vyew/logdigest/rundigestall
+
+#Update git status few minutes
+#*/3 * * * *  root /data/vhosts/vyew.com/utils/misc/gitstatus.sh
+
+#Index every 15 mins
+#*/20 * * * * root cd /data/vhosts/vyew.com/httpdocs/v3.83/cgi;/usr/bin/php Indexer.php
+
+#Fetch/backup git repos
+10 22 * * * root /bin/sh /git/fetchAllRepos.sh > /git/.fetchAllRepos.log 2>&1
+
+# process scheduled meetings (every two minutes)
+#*/2 * * * * root /usr/bin/php /opt/vyew/sched_meets/CheckSchedules.php >> /tmp/schedule.log 2>&1
+
+## CraigsAlert
+*/20 * * * * root /bin/sh /data/vhosts/craigsalert.krupt.com/httpdocs/cron_craigsalert.sh >/dev/null
+
+## Send weather to tims phone every morning
+0 20  * * * root /usr/bin/php /opt/vyew/misc/check.weather.script/chkweather2.php  > /dev/null 2>&1
+
+## Update API docs
+0 7 * * * * root /bin/sh /data/vhosts/vyew.com/httpdocs/intapi/cron.sh
+
+
+## CRON for SSMON
+#PATH_SSMON=/opt/vyew/ssmon/ssmon.php
+## Normal tests - every 15 mins
+#*/8 * * * * root /usr/bin/php $PATH_SSMON > /dev/null 2>&1
+## Hourly tests
+#40 * * * * root /usr/bin/php $PATH_SSMON hourly > /dev/null 2>&1
+## Daily tests
+#15 9 * * * root /usr/bin/php $PATH_SSMON daily > /dev/null 2>&1
+
+
+## Check Vyew API every 20 mins and report to log file
+*/20 * * * * root /bin/sh /etc/nagios/objects/scripts/CheckAPI.sh >/dev/null 2>&1
+
+
+## Run reports for nstep every hour
+0 * * * *		root	/usr/bin/php   /data/vhosts/vyew.com/httpdocs/nstep/reports/cron.tutors.php
+
+
+#*/5 * * * * /usr/local/bin/runBounced.sh
+#*/20 * * * * php -f /data/vhosts/vyew.com/httpdocs/reporting/affiliateUsers.php
+#*/20 * * * * php -f /data/vhosts/vyew.com/httpdocs/reporting/setCommission.php
+#*/20 * * * * php -f /data/vhosts/vyew.com/billing/VyewDailyScript.php
+#*/50 * * *  * php -f /data/vhosts/vyew.com/httpdocs/v3.5/cgi/attachConverter.php
+#*/30 * * *  * php -f /data/vhosts/vyew.com/httpdocs/maintenance/processBouncedMail.php
+
+

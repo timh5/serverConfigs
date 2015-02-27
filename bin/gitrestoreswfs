@@ -1,0 +1,27 @@
+#!/bin/bash
+# run from a version directory to backup all swfs into a tmp dir
+
+DEST=/tmp/bakswfs
+CURRDIR=${PWD##*/}
+
+#make sure we are in a root version dir
+if [[ ! $CURRDIR =~ "^v[3-9][0-9]?\.[0-9]" ]]; then
+	echo "Must run this in a root version directory, such as httpdocs/v4.37";
+	exit 1;
+fi
+
+if [ ! -e $DEST/$CURRDIR ]; then
+	echo "No backedup swfs found in $DEST/$CURRDIR."
+	echo "Perhaps gitbakswfs was never run?"
+fi
+
+echo "Restoring swf's from $DEST/$CURRDIR to local working dir"
+echo "--------------------------------"
+
+for file in `find $DEST/$CURRDIR -name '*.swf'`; do
+	fdest=`echo $file|sed -r 's/.*(content.*swf).*/\1/'`
+	echo cp -f $DEST/$CURRDIR/$fdest ./$fdest
+done
+
+
+

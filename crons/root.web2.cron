@@ -1,0 +1,4 @@
+
+1 1 * * * root sh /root/vyew/mysql.utils/log_db_size.sh
+*/5 * * * * root sh /opt/vyew/bin/chkConverts
+*/5 * * * * root /bin/sh /root/vyew/logdigest/gatherLogStats.sh

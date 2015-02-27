@@ -1,0 +1,60 @@
+
+## To install git on new machine, copy the rest of the lines
+## and paste into the new machines command line
+
+rf=/etc/yum.repos.d/webtatic.repo
+if [ ! -f $rf ]; then
+echo '[webtatic]' >> $rf
+echo 'name=Webtatic Repository $releasever - $basearch' >> $rf
+echo 'baseurl=http://repo.webtatic.com/yum/centos/$releasever/$basearch/' >> $rf
+echo 'enabled=0' >> $rf
+echo 'gpgcheck=1' >> $rf
+echo 'gpgkey=http://repo.webtatic.com/yum/RPM-GPG-KEY-webtatic-andy' >> $rf
+fi
+
+
+rf=/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
+if [ ! -f $rf ]; then
+	scp root@dev.vyew.com:$rf $rf
+fi
+
+
+rf=/etc/yum.repos.d/rpmforge.repo
+if [ ! -f $rf ]; then
+echo '[rpmforge]' >> $rf
+echo 'name = Red Hat Enterprise $releasever - RPMforge.net - dag' >> $rf
+echo 'mirrorlist = http://apt.sw.be/redhat/el5/en/mirrors-rpmforge' >> $rf
+echo 'enabled = 1' >> $rf
+echo 'protect = 0' >> $rf
+echo 'gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag' >> $rf
+echo 'gpgcheck = 1' >> $rf
+fi
+
+yum install  --enablerepo=webtatic --enablerepo=rpmforge  git
+
+xf=/tmp/co-vyew
+echo 'rf=~/.ssh/id_rsa.pub' > $xf
+echo 'if [ ! -f $rf  ];then' >> $xf
+echo '	echo "Will generate ssh keys. ENTER to continue."' >> $xf
+echo '	read' >> $xf
+echo '	ssh-keygen' >> $xf
+echo 'fi' >> $xf
+echo '[ ! -f $rf ] && echo "Error generating $rf!!"'
+echo 'echo -ne "\n\n\n---- GO PASTE THIS INTO A SUB8 COMMAND LINE  sub8:/git/.ssh/authorized_keys ----\n"' >> $xf
+echo 'tmp=`cat $rf`' >> $xf
+echo 'echo "echo $tmp >> /git/.ssh/authorized_keys"' >> $xf
+echo 'echo -ne "----- END PASTE ------\n(AFTER following instructions above, press ENTER to check out /opt/vyew, CTRL-C to cancel)\n"' >> $xf
+echo 'read' >> $xf
+echo 'cd /opt' >> $xf
+echo 'if [ ! -d vyew ];then' >> $xf
+echo '	git clone ssh://git@office.simulat.com/git/vyew.com-utils vyew' >> $xf
+echo '	[ -d /opt/vyew ] && ln -sf /opt/vyew ~/'
+echo '	cd /opt/vyew' >> $xf
+echo 'fi' >> $xf
+sh $xf
+
+
+
+
+
+

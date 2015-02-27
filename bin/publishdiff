@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# Publish a diff to html
+#
+# Usage: publishdiff <file>
+# Usage: publishdiff <commit> <commit>
+#
+
+pubdir=/data/vhosts/vyew.com/httpdocs/tim/branches/diffs
+pubhtml="http://dev.vyew.com/tim/branches/diffs"
+
+if [ "$1" == "" ];then
+	echo "Publish a git diff to html for code review
+Usage: publishdiff <commit id> <commit id>
+or
+Usage: publishdiff <file> -- file is the output of a diff
+"
+	exit 255
+fi
+
+if [ "$2" != "" ];then
+	commit1=$1
+	commit2=$2
+	infile=/tmp/.pubdifftmp
+
+	git diff --no-color --unified=20 -w $commit1 $commit2  >  $infile
+else
+	infile=$1
+fi
+
+outfname=`date "+%s"`
+outfname="$outfname.html"
+outfile="$pubdir/$outfname"
+
+
+echo '<html><link rel="stylesheet" type="text/css" href="../clrdiff.css" /><pre>' > $outfile
+
+cat $infile \
+        | dos2unix \
+        | sed -r 's|<|\&lt;|g' \
+        | sed -r 's|>|\&gt;|g' \
+        | sed -r 's/^(diff...git.*|index .*|--- .*|\+\+\+ .*|@@ .*)/<span class=bold>\1<\/span>/g' \
+        | sed -r 's|^(-.*)|<span class=neg>\1</span>|g' \
+        | sed -r 's|^(\+.*)|<span class=pos>\1</span>|g' \
+        | awk '{n+=1; printf("%.5d: %s\n", NR-1, $0)}' \
+        | sed -r 's|^(0+)?([0-9]+:)(.*)|<span class=lnz>\1</span><span class=ln>\2</span>\3|' \
+        >> $outfile
+
+echo "Published to $pubhtml/$outfname"
+
+
+

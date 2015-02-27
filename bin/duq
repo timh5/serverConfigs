@@ -1,0 +1,13 @@
+#!/bin/sh
+# Like du, but quicker
+# Usage: du [-nr] = not recursive
+
+if [ "$1" == "-nr" ];then
+	bytes=`ls -l|awk '{t+=$5}END{print t}'`
+else
+	bytes=`ls -lR|awk '{t+=$5}END{print t}'`
+fi
+
+echo "$bytes bytes"
+mb=`expr $bytes / 1000000`
+echo "$mb Mb"

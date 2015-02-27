@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#
+#logdigest at 4:30am
+#39 4 * * * root /bin/sh /data/vhosts/vyew.com/utils/rundigestall
+
+/bin/sh /data/vhosts/vyew.com/utils/rundigestall
+

@@ -1,0 +1,40 @@
+#!/usr/bin/php
+<?
+// parse out json from trello json export
+// output as text
+
+$file=$argv[1];
+if( !$file ){
+	echo "Usage: " . $argv[0] . " <file.json>\n";
+	exit(255);
+}
+$d=file_get_contents($file);
+$j=json_decode($d, TRUE);
+
+
+echo "Lists:\n";
+// see what lists there are, store it
+foreach( $j['lists'] as $l ){
+	echo $l['id'] . "\t" . $l['name'] . "\n";
+	$lists[$l['id']] = $l['name'];
+}
+
+echo "\n";
+$items=array();
+// group items into lists
+foreach( $j['cards'] as $c ){
+	$items[ $c['idList'] ][] = $c['name'];
+}
+
+// print them out
+foreach( $items as $idList=>$listItems ){
+	echo "\n";
+	echo $lists[ $idList ] . "\n-----------------------\n";
+	foreach( $listItems as $li ){
+		echo $li . "\n";
+	}
+}
+
+//var_dump($items);
+
+

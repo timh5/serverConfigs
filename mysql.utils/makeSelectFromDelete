@@ -1,0 +1,22 @@
+#!/bin/sh
+
+#pipe deletes through this script to convert DELETE FROMS to SELECT FROMs for backing up 
+#usage:cat someFile | ./skip [n] 
+
+
+while read line; do
+
+	## Make sure this line is a DELETE statement
+	CMD=`echo "$line" | grep '^DELETE FROM'`
+	[ $? -eq 1 ] && continue;
+
+	## Extract table name
+	TBL=$(echo "$line" | sed -r 's/.*DELETE FROM..([^`]*)...([^`]*).*/\1.\2/')
+
+	## Make SELECT statement
+	echo "$line" \
+	| sed -r "s/^DELETE FROM ([^ ]*) WHERE ([^ ]*).*/SELECT *,'$TBL' as tbl FROM \1 WHERE \2;/" \
+	| grep -v 'DELETE F';
+
+done
+

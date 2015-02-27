@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$1" -gt 0 ];then
+	lines=$1
+else
+	lines=9999
+fi
+
+
+tail -n $lines /var/log/php.log|less
+
+

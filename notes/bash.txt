@@ -1,0 +1,11 @@
+
+#Date stamp
+date +"%D %r"
+
+#Regex replace in variable
+X="abcdef"
+echo ${X/a/Z} // "Zbcdef"
+
+
+
+

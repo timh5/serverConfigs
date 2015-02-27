@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+#logdigest at 4:30am
+#39 4 * * * root /bin/sh /data/vhosts/vyew.com/utils/rundigestall
+
+
+/bin/sh /opt/vyew/logdigest/rundigestall  conf/ph1hn2.vyew.conf
+

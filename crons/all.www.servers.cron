@@ -1,0 +1,27 @@
+
+#
+# ANY CRONS THAT SHOULD RUN ON BOTH WWW SERVERS SHOULD GO IN HERE, THEN UPDATED ON EACH SERVER
+#
+
+#
+#   IMPORTANT: AFTER EDITING THIS FILE, PLEASE CHECK IT IN
+#   cp www.web2.cron /root/sysutils/crons/
+#   svn ci -m"updated Cron" /root/sysutils/crons/
+#
+#
+
+#* * * * * root /bin/sh /data/vhosts/vyew.com/httpdocs/downloadable/recordings/cron_recordings.sh >/dev/null 2>&1
+
+#Rotate logs
+10 3 * * * root /usr/sbin/logrotate -v /opt/vyew/conf/vyew.logrotate.conf >> /tmp/last.logrotate.log 2>&1
+
+# clean /tmp
+# every 3 hours, delete files older than 11 hours
+0 */3 * * * root /usr/sbin/tmpwatch 11 /tmp
+
+# clean out screens dir every hour
+#50 * * * * root [ -d /data/vhosts/vyew.com/httpdocs/screens ] && find /data/vhosts/vyew.com/httpdocs/screens -mtime +3|egrep '(jpg|png)$'|xargs rm -f
+
+#a better cleaner for screen shots
+1,16,31,46 * * * * root /bin/sh /opt/vyew/crons/vyew.cleanscreens.sh
+

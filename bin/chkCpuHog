@@ -1,0 +1,133 @@
+#!/bin/sh
+# Check if a process is taking over a certain CPU for a given time
+# NOTE: This program assumes it will be run from cron in about 5 min or 10 min intervals
+# Usage:  	chkCpuHog <command_string> [max_time_mins]
+# Example:	chkCpuHog soffice.bin 90 pcpu 5
+#
+# Todo:
+# 	Report actual command name that is messing up
+#
+
+CPUMAX=95
+HOSTNAME=$1
+MAXSEC=$2
+DOKILL=1
+KILL_IF_MATCH="soffice.bin"
+DOSENDALERT=0
+
+#[ ! $CMD ] && echo "Missing Params." && exit 1
+[ ! $MAXSEC ] && MAXSEC=250
+
+TFILE="/tmp/chkHog"
+DEBUG=''
+XFILTER=/opt/vyew/bin/xfilter
+LOGFILE=/var/log/chkCpuHog.log
+
+#Get a list of PIDs, which are over threshold of cpu, save to file
+#Compare these PIDs to PIDs from 5mins ago
+#If any overlap, send out a notification
+
+#Save current to curr file
+NOW=`date +%s`
+NOW_UTC=`date "+%Y-%m-%d %H:%M:%S"`
+[ ! $HOSTNAME ] && HOSTNAME=`hostname`
+LOGIT_URL="http://dev.vyew.com/mon/logit.php?id=procHog_$HOSTNAME"
+OUT="[$NOW_UTC] $HOSTNAME "
+date +%s > $TFILE.curr
+
+COLS="pid,$PROC,cmd"
+
+top -bn1|grep 'soffice'|awk '{print $1 "\t" $9 "\t" $12}'| awk "{if (\$2 > $CPUMAX) print \$0}" |awk '{print $1}'>> $TFILE.curr
+top -bn1|grep 'soffice'|awk '{print $1 "\t" $9 "\t" $12}'| awk "{if (\$2 > $CPUMAX) print \$0}" >> $TFILE.curr.all
+
+#ps axo $COLS|egrep -v '(egrep)'| awk "{if (\$2 > $CPUMAX) print \$0}" |awk '{print $1}'>> $TFILE.curr
+#ps axo $COLS|egrep -v '(egrep)'| awk "{if (\$2 > $CPUMAX) print \$0}" > $TFILE.curr.all
+#cat x |egrep -v '(egrep)'| awk "{if (\$2 > $CPUMAX) print \$0}" |awk '{print $1}'>> $TFILE.curr
+#cat x |egrep -v '(egrep)'| awk "{if (\$2 > $CPUMAX) print \$0}" > $TFILE.curr.all
+
+
+#Check time from last log file
+ROTATE=''
+if [ -e $TFILE ];then
+	LASTTIME=`head -n1 $TFILE`; [ $DEBUG ] && echo "Last time was $LASTTIME"
+	DIFF=`expr $NOW - $LASTTIME`; [ $DEBUG ] && echo "Diff is $DIFF seconds"
+
+	## Check if over maxtime
+	if [ $DIFF -gt $MAXSEC ] || [ "$1" == "-f" ] ;then
+		[ $DEBUG ] && echo "Is over max time ($MAXSEC) so checking"
+		ROTATE=1
+		
+		##Now compare for overlapping PIDs
+		$XFILTER $TFILE $TFILE.curr -m > $TFILE.matches
+		LINES=`wc -l $TFILE.matches|sort -n|uniq|awk '{print $1}'`
+
+		##See if any OLD PID's are still going
+		if [ $LINES -ge 1 ];then
+			echo "$HOSTNAME Max CPU for $MAXSEC seconds:" > $TFILE.send 
+			## Loop through each PID and build email and logging, and kill it
+			FOUNDPROBS=0
+			for pid in `cat $TFILE.matches|sort -n|uniq`;do 
+				FOUNDPROBS=1
+				THISPIDLINE=`cat $TFILE.curr.all|egrep $pid`
+				echo $THISPIDLINE >> $TFILE.send
+
+				THISPID=`echo $THISPIDLINE|awk '{print $1}'`
+				OUT="$OUT PID_at_Max_CPU: $THISPID"
+				
+				## Check line matches KILL_IF_MATCH
+				tmp=`echo $THISPIDLINE|grep "$KILL_IF_MATCH"`
+				if [ $? == 0 ] && [ $DOKILL == 1 ];then
+					## Try to kill it
+					echo "** Attempting to kill $THISPID" | tee -a $TFILE.send
+					OUT="$OUT Mas CPU PID:$THISPIDLINE, KILLING $THISPID!"
+								
+					kill $THISPID
+					rtn=$?
+					if [ $rtn != 0 ];then
+						sleep 3
+						kill -9 $THISPID
+						rtn=$?
+					fi
+					if [ $rtn == 0 ];then
+						echo "** KILLED $THISPID OK" | tee -a $TFILE.send
+						OUT="$OUT OK."
+					else
+						echo "** KILL FAILED FOR $THISPID" | tee -a $TFILE.send
+						OUT="$OUT FAIL."
+					fi
+				fi
+
+			done
+
+			if [ $FOUNDPROBS == 1 ];then
+                echo $OUT
+                wget "${LOGIT_URL}&result=FAIL&detail=PID_at_max_cpu_$THISPID" -O - >/dev/null 2>&1
+			fi
+#			echo "--- sending --- ";
+#			cat $TFILE.send
+#			echo "--- end sending --- ";
+			[ $DOSENDALERT == 1 ] && cat $TFILE.send | mail -s"$HOSTNAME Max CPU PID(s)" $ALERT_EMAIL
+		else
+			OUT="$OUT OK"	
+			echo $OUT
+			wget "${LOGIT_URL}&result=OK"  -O - >/dev/null 2>&1
+		fi
+
+	else
+		echo "OK: Skipping. Has not been more than $MAXSEC seconds (maxtime) since last run"
+		exit 0
+	fi
+
+else
+	ROTATE=1;
+fi
+
+echo $OUT >> $LOGFILE
+
+if [ $ROTATE ]; then
+	[ $DEBUG ] && echo "Rotating"
+	mv $TFILE $TFILE.bak -f
+	mv $TFILE.curr $TFILE -f
+fi
+
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Check for existance of up-to-dateness of version directories
+# Usage: chkVersionDirs vN.NN vN.NN vN.NN ... etc
+#
+
+function chkVers
+{
+	vers=$1
+	htpath=/data/vhosts/vyew.com/httpdocs
+	[ "`hostname`" == "web2.vyew.com" ] && htpath="/vz/private/25$htpath"
+
+	[ ! -d $htpath ] && echo "Error: Cant find $htpath" && exit 1
+
+	if [ -d $htpath/$vers ];then
+		cd $htpath/$vers
+		branch=`git branch |egrep '^\*'|sed -r 's/[\* ]//g'`
+		if [ "$branch" == "" ];then
+			echo $vers="(none)"
+		else
+			echo "$vers=$branch"
+		fi
+	else
+		echo "$vers=no_exist"
+	fi
+}
+
+while [ "$1" != "" ];do
+	chkVers $1
+	shift
+done
+

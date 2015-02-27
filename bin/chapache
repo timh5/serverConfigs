@@ -1,0 +1,11 @@
+#!/bin/sh
+#converts given file or dir to ownership and rread/write rights
+
+if [ "$1" == "" ];then
+	echo "Usage: $0 <dir/file>"
+	echo "Runs chown apache, and chmod ug+rw on given files/dirs/subdirs"
+	exit
+fi
+
+chown -R apache.apache $1
+chmod -R ug+rw $1

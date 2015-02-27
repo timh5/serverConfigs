@@ -1,0 +1,152 @@
+#!/usr/bin/python
+# analyzes a given audio file every X seconds. In each sample, will average the audio gain
+# for Y seconds... and give you an array of volumes for each X seconds
+
+# todo: try with 2 channel stereo, and various sample rates,
+# todo: make work with mp3
+
+
+INTERVAL_SEC=1		# how often to check volume
+AVR_SAMPLE_SEC=.5	# how much audio to check in each sample
+						# ie. how many seconds to average for the volume
+DBG=0
+
+import os, sys, wave, struct
+import pymedia.audio.sound as sound, time
+import pymedia.audio.acodec as acodec
+
+def main():
+	filename=''
+	if len(sys.argv)>1:
+		filename=sys.argv[1]
+
+	if not filename or not os.path.exists(filename):
+		print "Usage: ",sys.argv[0], "<audio_file_name>"
+		sys.exit(255)
+
+	file_ext = os.path.splitext(filename)[1][1:].lower()  #  str.split( name, '.' )[ -1 ].lower()
+	if file_ext == 'wav': getWavList(filename)
+	elif file_ext == 'mp3': getMp3List(filename) 
+	else: print "File ext not recognized"
+
+
+
+def getMp3List(filename):
+	import pymedia.muxer as muxer
+
+	dm= muxer.Demuxer( 'mp3' )
+	f=open(filename)
+	s=f.read()
+	frames=dm.parse(s)
+	maxVol=32768		#hard code based on 16-bit (2^16 / 2)
+
+	frameNum=0	
+	curr_time=float(0)
+	# Loop through each section of frames
+	for fnum,frame in enumerate(frames):
+		dec=acodec.Decoder( dm.streams[0] )
+		r=dec.decode(frame[1])
+		
+		frameRate=r.sample_rate
+		channels=r.channels
+		sampleLen=AVR_SAMPLE_SEC*(frameRate*channels)
+
+		data=str(r.data)
+		fmt=str(len(data)/2) + 'h'
+		unpacked=struct.unpack(fmt, data)
+
+		#print 'frameRate:', r.sample_rate, 'channels', r.channels, 'bitrate', r.bitrate, 'datalen', len(unpacked)
+		
+		# Loop through each frame
+		chan_val=0
+		tot_val=0
+		count=0
+		start_sect_time=curr_time
+		for i,val in enumerate(unpacked):
+			frameNum+=1
+			curr_sect_time=(i/float(frameRate))/channels
+			curr_time=start_sect_time+curr_sect_time
+
+			val=abs(val)
+			if val > chan_val: chan_val=val
+
+			if i % channels == 0:
+				tot_val+=chan_val
+				count+=1
+				chan_val=0
+
+		sect_time_len=curr_time-start_sect_time	
+		avrVol=tot_val/count
+		avrVolPerc=round(avrVol/float(maxVol),1)
+		print round(start_sect_time, 1), avrVolPerc, printGraph(avrVolPerc)
+
+
+
+
+# Note: for 16-bit, the volume values are 2^16, or 65k, or -32k to +32k
+def getWavList(file):
+	global INTERVAL_SEC, AVR_SAMPLE_SEC
+	volDict={}
+	f=wave.open(file, 'rb') 
+	frameRate=f.getframerate()
+	channels=f.getnchannels()
+	totFrames=f.getnframes()
+	bitRate=f.getsampwidth() * 8		# convert bytes to bits
+	maxVol=(2 ** bitRate) / 2 			# 16-bit = 64k poss values, ie. -32k to +32k
+
+	## Each sample interval, get the average volume for that second
+	for i in range(0, totFrames, frameRate*INTERVAL_SEC):
+		curr_sec=int(round(i/frameRate))
+		f.setpos(i)
+		sampleLen=AVR_SAMPLE_SEC*(frameRate*channels)
+		waveData=f.readframes(sampleLen)
+
+		fmt='<'+'h'*(len(waveData)/2)		#binary data format
+		data=struct.unpack(fmt, waveData)
+
+		avrVol=getAvrVol(data, channels)
+		avrVolPerc=round(avrVol/float(maxVol), 2)
+		print curr_sec, avrVolPerc, printGraph(avrVolPerc)
+
+	f.close()
+	return volDict
+
+
+
+def printGraph(val):
+	v=int(val*100)
+	return ("*" * v).ljust(100) + '|'
+
+
+
+# For each array of data, get the average volume
+# also, for multi channel, use the highest of both channels (ie left/right), 
+# dont factor both into the average
+def getAvrVol(data, channels):
+	#print 'dlen', len(data)
+	chan_val=0
+	tot=0
+	count=0
+	for i,val in enumerate(data):
+		val=abs(val)
+
+		# if this is a channel boundary, 
+		if val > chan_val: chan_val = val
+
+		if i % channels == 0:
+				tot+=chan_val
+				#print chan_val
+				count+=1
+				chan_val=0
+			
+		
+	avr=tot/count
+	#print '>>> AVR:',avr
+	#sys.exit()
+	return avr
+
+
+
+main()
+
+

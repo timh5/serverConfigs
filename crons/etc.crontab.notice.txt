@@ -1,0 +1,14 @@
+#
+# ALL CRONS HAVE BEEN MOVED. DO NOT PLACE ANY VYEW RELATED CRONS HERE ANYMORE
+#
+# CRONS ARE NOW LOCATED IN /etc/cron.d/server.name.cron
+# Once they are edited, they should be copied to /root/sysutils/crons/ and CHECKED IN.
+# Their SVN location is: svn+ssh://root@office.simulat.com/svn/sim/vyew/sysutils/crons
+#
+
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+# sd/gd - Save Directory / Goto Direcotry Tool 
+#		  for saving and jumping to a bunch of directories like what ' and m keys do for vim
+#
+# Usage: Place this line into your .bashrc script
+#		 "source /opt/vyew/misc/saveDirUtil"
+#
+# Then, do this:
+# sd a - save current directory as "a"
+# gd a - jumps to directory saved in "a"
+#
+
+function sd-help
+{
+	echo "sd/gd - Save/Goto Directory. Save current directory into a given register"
+	echo "Use gd (Go Directory) to jump back to that directory"
+	echo "Usage: 	sd <register>"
+	echo "Example:	sd a	-	to save current directory in register 'a'"
+	echo "		gd a 	- 	go to directory thats saved in register 'a'"
+	echo ""
+}
+
+function sd
+{
+	TMP=/tmp/.sd.saved.dirs
+	[ -z $1 ] && sd-help && return 255
+	echo "$1=$PWD" | tee -a $TMP
+}
+
+
+function gd
+{
+	TMP=/tmp/.sd.saved.dirs
+	if [ -z $1 ];then
+		echo "Save directory registeres"
+		tac $TMP | sort | uniq
+		return 1
+	fi
+	LINE=`tac $TMP | grep -m1 "^$1=" -`
+	[ $? != 0 ] && echo "Cant find register $1" && return 1
+	DIR=`echo $LINE | sed -r 's/^[^=]+=(.*)/\1/'`
+	echo "Jumping to $DIR"
+	cd $DIR
+}
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+# run from a version directory to backup all swfs into a tmp dir
+
+DEST=/tmp/bakswfs
+CURRDIR=${PWD##*/}
+
+#make sure we are in a root version dir
+if [[ ! $CURRDIR =~ "^v[3-9][0-9]?\.[0-9]" ]]; then
+	echo "Must run this in a root version directory, such as httpdocs/v4.37";
+	exit 1;
+fi
+
+mkdir -p $DEST/$CURRDIR
+
+echo "Backup current swfs into $DEST/$CURRDIR"
+echo "Run gitrestoreswfs to restore"
+echo "------------------------------------------"
+
+for file in `git st|grep swf|grep modified|sed -r 's/^.*(content.*swf).*$/\1/'`;do
+	fpath=`dirname $file`
+	mkdir -p $DEST/$CURRDIR/$fpath
+	cp -fv $file $DEST/$CURRDIR/$fpath
+done
+
+
+

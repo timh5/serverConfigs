@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#tail -n999999 /var/log/vhosts/vyew.com/access_log |grep $1|awk '{print $7}'|head
+source /opt/vyew/vyew.conf
+grep $1 "$vyhtml/urls" | head -n20
+
+
+

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+#mk-table-sync --synctomaster h=db.web2,u=root,p=...,D=vyew,t=books_copy3 --verbose --print --columns=name,id,ownerID | less
+
+if [ "$2" == "" ];then
+	echo "Usage:	$0 host-DSN DATABASE.TABLE(s) [OPTIONS]"
+	echo "Example:	$0 db.web1,p=abc db.web2 users,drawings"
+	echo "-------------------"
+	echo "	-n		dry run, dont execute"
+	echo "	-c col	use column col (comma delim list)"
+	echo "	-a alg	use algorithm"
+	echo "	-p		print sql queries used"
+	exit
+fi
+
+HOST1=$1
+
+TB=$2
+CMD=`echo "$TB" | grep '\.'`
+if [ $? == 0 ]; then
+	DB=`echo "$TB" | sed 's/\..*//'`
+	TABLES=`echo "$TB" | sed 's/.*\.//'`
+else
+	DB="vyew"
+	TABLES=$TB
+fi
+
+shift 2
+OPT=""
+while getopts "c:a:xpn" flag;do
+   case $flag in
+    n) OPT_DRY=1;;
+	c) OPT="$OPT --columns $OPTARG";;
+	a) OPT="$OPT --algorithm $OPTARG";;
+	p) OPT="$OPT --print";;
+	x) OPT_X=1;;
+   esac
+done
+
+if [ ! $OPT_DRY ] || [ $OPT_X ] ;then
+	OPT="$OPT -x"
+fi
+
+echo mk-table-sync --synctomaster $HOST1,D=$DB,t=$TABLES --verbose $OPT
+
+mk-table-sync --synctomaster $HOST1,D=$DB,t=$TABLES --verbose $OPT
+

@@ -1,0 +1,77 @@
+Bash prompt:
+
+root@host DIR#
+PS1="\u@\h \W# "
+
+
+
+
+How to use symlinks in a chrooted environment like in FTP...
+For example, if user ftp's in, then a symlink -> /var/www/html wont work
+because the "/" root is different in the chrooted environment.
+To fix use:
+
+mkdir /home/user/blah.com
+mount --bind /var/www/vhosts/blah.com /home/user/blah.com
+
+
+
+
+Mirroring a website:
+wget --mirror -w 2 -p --html-extension --convert-links -P <dir_prefix> http://www.yourdomain.com
+
+	-w N	wait N seconds between loads
+	-p		get all prerequisites
+	-r		recursive
+	-l N	specify levels of recusrion, 0=infinite
+	-k,--convert-links	convert to relative/local links
+	-E		add html extension
+	-N
+	--mirror = -r -N -l inf --no-remove-listing
+
+
+
+## Modifying HAPROXY:
+1. edit config file on parent box: /etc/haproxy.cfg
+2. find old pid: ps aux|grep haproxy
+3. start new haproxy, supplying graceful finish of old pid:
+   haproxy -f /etc/haproxy.cfg -sf <OLD_PID>
+
+
+
+
+## Mounting sub1 from sub6
+mount -t cifs //sub1/users   -o username=Administrator,password=passwd,file_mode=0777,dir_mode=0777 /sub1/users
+
+
+## Scanning a windows network for machines
+./misc/nbtscan 192.168.1.1/24
+
+
+
+## Partition a new drive
+fstab /dev/NNN
+p - print
+c - create primary
+w - write
+mkdir /mnt/NNN1
+mkfs.ext3 -L /mnt/NNN /dev/NNN1 - format it
+echo "/dev/NNN1 /mnt/NNN  ext3     defaults 1 2" >> /etc/fstab
+mount /dev/NNN
+
+
+
+
+
+## Union, Intersect, Differences of files
+It is remarkably helpful sometimes that you can do set intersection, union, and difference of text files via sort/uniq. Suppose a and b are text files that are already uniqued. This is fast, and works on files of arbitrary size, up to many gigabytes. (Sort is not limited by memory, though you may need to use the -T option if /tmp is on a small root partition.)
+
+cat a b | sort | uniq > c   # c is a union b
+cat a b | sort | uniq -d > c   # c is a intersect b
+cat a b b | sort | uniq -u > c   # c is set difference a - b
+
+
+how to download from google drive gdrive using wget.
+https://googledrive.com/host/file-id
+Ex: https://googledrive.com/host/0B95k2kr1bG9feGVhd0p3QkVCSVE
+

@@ -1,0 +1,17 @@
+#!/bin/sh	
+
+#usage: echot N some string here
+
+[ "$1" == "" ] && exit
+colwid=$1
+shift 1
+txt=$*
+
+spacenum=`expr $colwid - ${#txt}`
+spaces=""
+for s in `seq 1 $spacenum`;do 
+	spaces="$spaces "
+done
+
+echo "$txt$spaces."
+

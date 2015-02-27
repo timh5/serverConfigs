@@ -1,0 +1,55 @@
+#!/usr/bin/php
+<?php
+# Usage: xfilter <file1> <file2> 
+# 
+# todo: add options: 
+/*
+                -i              ignore case
+                -m              show matches, (opposite of filter)
+                                        ie. show lines that are in both files
+                -r      reverse files, filter file 2 by file 1
+
+*/
+
+$f1=$argv[1];
+$f2=$argv[2];
+$strip=(array_search('-s', $argv) !== FALSE);
+
+// todo use getopt
+if( empty($f2) ){
+	echo "Usage: xfilter <file1> <file2> [-s]\n";
+	echo "		-s = strip spaces. underscores, dashes when comparing\n";
+	echo "This will output all items in file1 which are NOT in file2\n";
+	echo "		file1	file2\n";
+	echo "		-----	-----\n";
+	echo "		a		c\n";
+	echo "		b		d\n";
+	echo "		c		e\n";
+	echo "Output:\n";
+	echo "a\n";
+	echo "b\n";
+	exit(255);
+}
+
+
+$handle = @fopen($f2, "r");
+if ($handle) {
+    while (($line = fgets($handle, 4096)) !== false) {
+		$line=trim($line);
+		if($strip) $line=preg_replace('/[ -]/','',$line);
+		$filter_items[]=$line;
+	}
+    fclose($handle);
+}else die("Cant read $f2");
+
+$handle = fopen($f1, "r");
+if ($handle) {
+    while (($line = fgets($handle, 4096)) !== false) {
+		$line=trim($line);
+		$line2=$line;
+		if($strip) $line2=preg_replace('/[ -]/','',$line);
+		if( array_search( $line2, $filter_items ) === FALSE)
+			echo "$line\n";
+	}
+    fclose($handle);
+}else die("Cant read $f1");

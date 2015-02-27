@@ -1,0 +1,32 @@
+#!/bin/sh
+# Merges many lines into one line, separated by ";" or given symbol
+# USage: cat file | mergelines [-s SEPERATOR] [-bN] 
+#		-b divide in blocks of N
+DEFAULT_SEP=";"
+OPT_BLOCKS=20;
+
+while getopts "s:b:c:n:h" flag;do
+   case $flag in
+    s)  DEFAULT_SEP=$OPTARG;;
+    b|c|n)  OPT_BLOCKS=$OPTARG;;
+	h)  
+		echo "Usage: cat file | mergelines [-s SEPERATOR] [-bN]"
+		echo "		-b divide in blocks of N"
+		exit;;
+   esac
+done
+
+CT=1
+while read line; do
+	echo -n "$line$DEFAULT_SEP"
+	if [ $OPT_BLOCKS ]; then
+		if [ $CT -ge $OPT_BLOCKS ];then
+			echo ""
+			echo ""
+			CT=0;
+		fi
+		CT=`expr $CT + 1`
+	fi
+done
+
+echo ""

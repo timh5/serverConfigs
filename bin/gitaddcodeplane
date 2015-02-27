@@ -1,0 +1,21 @@
+#!/bin/sh
+# Add codeplane remote repo to current repo list if not yet added
+
+
+# make sure we are in a git dir
+x=`git status`
+if [ $? != 0 ];then
+	echo "ERROR: Must run from inside a git working directory"
+	exit 255
+fi
+
+# get git repo name
+repoName=`git remote -v|grep origin|tail -n1|sed -r 's/.*?office.simulat.com.git.([^ ]+).*/\1/'`
+
+# make sure there is a .git on the end
+x=`echo $repoName|grep '\.git'`
+[ $? != 0 ] && repoName="$repoName.git"
+
+echo "Adding repo to codeplane: $repoName"
+git remote add codeplane git@codeplane.com:vyew/$repoName
+

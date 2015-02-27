@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Colored diff
+# Usage: diffc file1 file2  -- diff 2 files
+# Usage: diffc /dir/file1   -- diff file1 against that same file in current dir
+#
+
+if [ "$1" == "" ];then
+	echo "display a colored DIFF with LESS builtin... and easy for comparing"
+	echo "2 files with the same name in different directories"
+	echo "Usage: diffc file1 file2        ## diff 2 files"
+	echo "Usage: diffc /dir/file1         ## diff file1 against that same file in current dir"
+	exit;
+fi
+
+file1=$1
+file2=$2
+
+## no 2nd file so parse it out from dir
+if [ "" == "$file2" ];then
+	file2=`basename $file1`
+fi
+
+diff -u $file1 $file2 | colordiff | less -RF
+
+
+
+
+

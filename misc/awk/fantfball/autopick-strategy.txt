@@ -1,0 +1,73 @@
+
+
+Let me begin this article by stating that, if given the option, it is always better to do a live draft than to have it autopicked for you.
+
+With that said, there will be times that you just can't make a draft. In fact, maybe your league is just an autopick draft anyway. In either case, there are ways to ensure you get the advantage over the other people in your league.
+
+An article I read last year on Yahoo! Sports (to the best of my knowledge it is no longer there) outlined what I am going to explain here. Last year, I didn't get the opportunity to try it out because I already had four teams, which is the maximum number you can have on Yahoo! I took down notes, did a little bit of my own research, and kept those notes in my filing cabinet for this year.
+
+Here's the deal: in a yahoo public league, there are always ten teams with the same position configuration (QB, WR, WR, WR, RB, RB, TE, K, DEF, BEN, BEN, BEN, BEN, BEN, BEN). As is stated on the Yahoo! fantasy football help page, "Given this system, it's important to remember that all starting positions are filled before any bench players are chosen. Additionally, keep in mind that the system will determine a maximum number of players to draft per position (starters plus bench) so that no roster ends up with an inordinate number of players at any single position (e.g., five quarterbacks in a league that has a single starting quarterback)."
+
+What this means to you is that in the first nine rounds, your starting roster will always be filled before more position players are added. This usually means that in rounds seven through nine, the computer will pick for you a tight end, a kicker, and a defense.
+
+Since there are ten teams with two starting RB positions, exactly twenty running backs will be picked within the first six rounds in most cases. What this means for you is that there are still top-25 running backs on the board while other teams are picking tight ends, kickers, and defenses in rounds seven, eight, and nine.
+
+So how do you manipulate a Yahoo! autopick draft?
+
+When you are setting your pre-rankings, do this:
+
+   1. Add all kickers to the "do not draft" list.
+   2. Add all defenses except for the top-tier defenses (Minnesota and San Diego, and New England as well if you wish) to the "do not draft" list.
+      Today's Must Reads
+      The 10 Most Underrated Footballers in Europe
+      Why the USC Trojans Won't Qualify for the BCS Title Game
+      Bleacher Report NFL Power Rankings: Week Four
+   3. Add all tight ends except for the top-tier tight ends (Antonio Gates, Jason Witten, Kellen Winslow, and Jeremy Shockey if you wish) to the "do not draft" list.
+
+What this does is force the computer to pick other quality players (read: running backs) during rounds seven through nine while the other teams are taking tight ends, kickers, and defenses.
+
+So, when setting your actual pre-rankings, this is how I did it:
+
+   1. Put the top 15 running backs first (in this group, I do not include Willie Parker. I picked him last year, and while he put up a ton of yards, he had very few touchdowns. This year, Pittsburgh drafted Rashard Mendenhall in the first round, who is expected to be Jerome Bettis for them. I see Parker getting fewer yards this year and even fewer touchdowns than before. If you want a Pittsburgh RB, go take Rashard Mendenhall later.)
+   2. For the next 25 spots, put the best WRs, QBs, and top tier TEs available.
+   3. Now, put in the top tier defenses (Minnesota and Baltimore).
+   4. For the next 20 spots, put in the top 20 RBs available.
+   5. For the last 25 spots, put the best WRs available.
+
+Doing this, assuming you have a mid-round spot, it is very likely you will get two high-quality RBs in the first two rounds, three good WRs and a good QB in the next four rounds, an elite defense in round seven, two more top 25 RBs in rounds eight and nine (this is ensured because while you're taking RBs, the other nine teams are taking defenses and kickers), two more decent WRs and a good backup QB in rounds eleven through thirteen, and in rounds fourteen and fifteen either two of the best WRs available at this point, or the best RBs left on the board.
+
+In my league, I got stuck with the 9th overall pick. This isn't desirable, but in a snaking draft this also means I'm picking three more turns later. Here's how it broke down for me:
+
+    * Round 1, pick 9: Marion Barber
+    * Round 2, pick 2: Clinton Portis
+    * Round 3, pick 9: Larry Fitzgerald
+    * Round 4, pick 2: Marques Colston
+    * Round 5, pick 9: Derek Anderson
+    * Round 6, pick 2: Roddy White
+    * Round 7, pick 9: Minnesota Defense
+    * Round 8, pick 2: San Diego Defense
+    * Round 9, pick 9: Earnest Graham
+    * Round 10, pick 2: Donald Driver
+    * Round 11, pick 9: Santana Moss
+    * Round 12, pick 2: Matt Schaub
+    * Round 13, pick 9: Selvin Young
+    * Round 14, pick 2: Julius Jones
+    * Round 15, pick 9: Rashard Mendenhall
+
+A few notes on this draft:
+
+    * I was assured an elite defense in round seven because in this round, most teams were taking tight ends. At this point, all the elite tight ends that I did not put in the "do not draft" list were taken by other players who had placed them too high in their pre-draft rankings (as in round four). Since I had no tight ends for the computer to pick, it was forced to go to the next best open position left, which was defense. None of the other teams picked a defense until round eight. The only reason I ended up getting two elite defenses was because I was picking second in the eighth round.
+    * In round nine, every other team chose a kicker. While they were doing that, I picked up Earnest Graham.
+
+Since there tends to be very negligible difference between elite kickers and no-name kickers in the long run, it is better to try to get as many position players as needed and eventually drop one of them to add a kicker before week one. In a ten team league, someone at least decent will be available in free agency for sure.
+
+Again in rounds thirteen through fifteen, the computer for the other nine teams went TE-K-DEF for backup players. In these rounds, I got Selvin Young, Julius Jones, and Rashard Mendenhall - all top 50 RBs who the other teams missed out on because they were taking unnecessary backups.
+
+Just to make a point:
+
+    * In free agency, the top four TEs available are Marcedes Lewis, Randy McMichael, Desmond Clark, and Jerramy Stevens - all useful TEs. I could add one of them and a guy like John Carlson or Dustin Keller as a backup.
+    * Also, there are numerous useful Ks available. I could add Josh Brown, Matt Stover, Kris Brown, or John Kasay if I want.
+    * I could instead trade one of my defenses since it really isn't necessary to carry two elite defenses like that. Moving San Diego and and another player for a high-end WR or RB (or TE for that matter) could end up being a good course of action for me.
+
+Whatever the case, drafting like this creates many good possibilities and gives you a much better team in general than any other team in the league.
+

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if [ "$2" == "" ];then 
+	filen=$1
+	targVer=`cat /tmp/.vvi.lastver.txt`
+else
+	filen=$2
+	targVer=$1;
+fi
+echo $targVer > /tmp/.vvi.lastver.txt
+
+if [ "$1" == "-?" ] || [ "$filen" == "" ] || [ "$targVer" == "" ];then
+	echo "Usage:vvi vN.MM filename
+	VIM Edit a file in a different version directory
+Usage: vvi filename
+	Assume the use of the last used version target dir
+Example:
+       >pwd
+       ..../v3.82/cgi/services
+       >vvi v3.83 VyewMain.php
+		#This will edit VyeMAin in v3.83/cgi/services directory
+        Now in ..../v3.83/cgi/services
+       >cd ..
+       >cvd            ## without specifying, remembers last version
+        Now in ..../v3.82/cgi
+       >cvd 1
+        Now in ..../v3.81/cgi
+       >cvd 74
+        Now in ..../v3.74/cgi
+
+";
+	exit 255;
+fi
+
+targDir=`pwd | sed -r "s|/v[0-9]{1,3}\.[0-9]{1,3}/|/$targVer/|"`
+targFile="$targDir/$filen"
+vi $targFile
+
+

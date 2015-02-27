@@ -1,0 +1,5 @@
+#
+# Assumes color=always in .gitconfig
+#
+
+git status|grep --color=never -v '\.swf'

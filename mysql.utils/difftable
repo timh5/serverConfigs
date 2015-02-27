@@ -1,0 +1,115 @@
+#!/bin/sh
+#compares rows of table on 2 different hosts
+
+if [ "$3" == "" ]; then
+	echo "Usage:   $0 host1-DSN host2-DSN DATABASE.TABLE [DATABASE.TABLE] [OPTIONS]"
+	echo "Compares a table in 2 databases, to see what rows are different"
+	echo "Examples: "
+	echo "	difftable db.web1,p=password db.web2 vyew.users"
+	echo "			- compares vyew.users on both hosts db.web1, db.web2"
+	echo "	difftable db.web1 db.web1 vyew1.users vyew2.users2"
+	echo "			- compares vyew1.users with vyew2.users2 on same db"
+	echo "Options:"
+	echo '	-w expr	use WHERE clause, example: -w "id\>4000" '
+	echo "				(note that you must escape \> and \> characters)"
+	echo "	-D	Dont dump table if tmp table file exists already"
+	echo "	-e	explain = show commands instead of running them"
+  	exit
+fi
+
+HOST1=$1
+HOST2=$2
+
+
+CMD=`echo "$3" | grep '\.'`
+if [ $? == 0 ]; then
+    DB1=`echo "$3" | sed 's/\..*//'`
+    TABLE1=`echo "$3" | sed 's/.*\.//'`
+else
+    DB1="vyew"
+    TABLE1=$3
+fi
+
+# Check for 4th option, if database.table name, or -option
+if [ "$4" ]  && [ "${4:0:1}" != "-" ]; then
+	CMD=`echo "$4" | grep '\.'`
+	if [ $? == 0 ]; then
+    	DB2=`echo "$4" | sed 's/\..*//'`
+    	TABLE2=`echo "$4" | sed 's/.*\.//'`
+	else
+    	DB2=$DB1
+    	TABLE2=$4
+	fi
+	shift 4
+else
+	DB2=$DB1
+	TABLE2=$TABLE1
+	shift 3
+fi
+
+OPT_WHERE="";
+while getopts "Dew:" flag;do
+   case $flag in
+	D) OPT_CHECKFILE=1;;
+	e) OPT_EXPL=1;;
+	w) OPT_WHERE="$OPTARG";;
+   esac
+done
+WHERE_CLAUSE="-w \"$OPT_WHERE\""
+
+CMD=`echo "$HOST1" | grep 'p='`
+if [ $? == 0 ];then
+	PW1=`echo "$HOST1" | sed 's/^.*,p=//' | sed s/,.*//`
+fi
+CMD=`echo "$HOST2" | grep 'p='`
+if [ $? == 0 ];then
+	PW2=`echo "$HOST2" | sed 's/^.*,p=//' | sed s/,.*//`
+fi
+
+if [ ! $PW2 ];then	
+	PW2=$PW1
+fi
+
+HOST1=`echo "$HOST1" | sed 's/,.*//'`
+HOST2=`echo "$HOST2" | sed 's/,.*//'`
+
+TFILE1=$HOST1.$DB1.$TABLE1.sql
+TFILE2=$HOST2.$DB2.$TABLE1.sql
+
+if [ ! $OPT_CHECKFILE ]  ||  $([ $OPT_CHECKFILE ] && [ ! -f .tmp.$TFILE1 ]); then
+	echo "Dumping $TABLE on $HOST1..."
+	if [ $OPT_EXPL ]; then
+		echo "mysqldump -h$HOST1 $DB1 --tables $TABLE1 -p$PW1 $WHERE_CLAUSE | sed 's/),/),\n/g'"
+		exit 
+	else
+		if [ ${#OPT_WHERE} -gt 1 ];then
+			mysqldump -h$HOST1 $DB1 --tables $TABLE1 -p$PW1 -w "$OPT_WHERE" | sed 's/),/),\n/g' > .tmp0.$TFILE1
+		else
+			mysqldump -h$HOST1 $DB1 --tables $TABLE1 -p$PW1 | sed 's/),/),\n/g' > .tmp0.$TFILE1
+		fi
+	fi
+	if [ ${PIPESTATUS[0]} -ne 0 ];then exit 1; fi
+	echo "Sorting..."
+	cat .tmp0.$TFILE1 | sort > .tmp.$TFILE1
+	rm .tmp0.$TFILE1 -f
+fi
+
+if [ ! $OPT_CHECKFILE ]  ||  $([ $OPT_CHECKFILE ] && [ ! -f .tmp.$TFILE2 ]); then
+	echo "Dumping $TABLE on $HOST2..."
+        if [ ${#OPT_WHERE} -gt 1 ];then
+            mysqldump -h$HOST2 $DB2 --tables $TABLE2 -p$PW2 -w "$OPT_WHERE" | sed 's/),/),\n/g' > .tmp0.$TFILE2
+        else
+        	mysqldump -h$HOST2 $DB2 --tables $TABLE2 -p$PW2 | sed 's/),/),\n/g' > .tmp0.$TFILE2
+        fi
+#	mysqldump -h$HOST2 $DB --tables $TABLE -p$PW2 | sed 's/),/),\n/g' > tmp0.$TFILE2 
+	if [ ${PIPESTATUS[0]} -ne 0 ];then exit 1; fi
+	echo "Sorting..."
+        cat .tmp0.$TFILE2 | sort > .tmp.$TFILE2
+        rm .tmp0.$TFILE2 -f 
+fi
+
+#find . -name '.tmp*' -mtime +7 | xargs rm 
+
+echo "Ready to diff..."
+sleep 2
+diff .tmp.$TFILE1 .tmp.$TFILE2 -u | tee .diff.$DB.$TABLE.sql

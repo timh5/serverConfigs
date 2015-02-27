@@ -1,0 +1,19 @@
+#
+#
+#	IMPORTANT: AFTER EDITING THIS FILE, PLEASE CHECK IT IN
+#   cp www.web1.cron /root/sysutils/crons/
+#   svn ci -m"updated Cron" /root/sysutils/crons/
+#
+#
+
+epoch=`date +%H%m`
+
+#check on file sizes...
+4 * * * * root cd /data/vhosts/vyew.com/httpdocs && du --max-depth=1 |sort -n > /tmp/htdocsize.$epoch.txt
+*/13 * * * * 	root	/bin/sh /opt/vyew/misc/chkApacheThreads.sh
+
+#clear out rsyncs
+
+#*/20 * * * * root /bin/sh /etc/cron.fifteen/vyew.cleanscreens.sh
+*/30 * * * * root /bin/sh /data/vhosts/vyew.com/httpdocs/screens/vyew.cleanscreens.sh
+

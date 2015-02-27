@@ -1,0 +1,330 @@
+
+#### Set shift width, tab stop
+se sw=4
+se ts=4
+
+#### ignore case on searches
+se ignorecase
+
+
+#### Common macros (set macro, goto line, type: 0"Ry$ -- print macro: "Rp, where R=register key)
+
+e: (errorlog)
+ierror_log(" ");€kl€kl€kl€kl
+
+r: (print_r error log)
+error_log(print_r(" ",true));
+
+c: (comment)
+i/**^M *^M *^M * @param ^M * @param ^M * @param ^M * @return ^M */^M^[
+
+v: (comment 1 tabs out)
+i   /**^M    *^M     *^M     * @param ^M     * @param ^M     * @param ^M     * @return ^M    */^M^[
+
+/**
+ *
+ *
+ *
+ */
+
+
+
+#### recording macros
+
+1. start recording your macro by typing q and then the single character ([0-9a-zA-Z"] are allowed). 
+	The single character is the register your macro will be stored in. 
+2. Enter the commands you want included in the macro. 
+3. Type q to finish recording the macro. 
+4. At this point you could run the macro by using @ and the register name. 
+5. To modify the macro, move to a blank line and type "Rp replacing R with the register 
+	name of your macro. This will paste all the commands in your macro to the current line. 
+6. After making the changes you need, save the macro by typing 0"Ry$ replacing R with the 
+	register name you want to use for the macro. The register name does not have to be the 
+	same as the original. 
+
+
+
+
+
+
+
+
+Essential .vimrc configuration items
+
+For whatever reason, the following options are not set by default, but they should be.
+
+   1. Turn on hidden
+
+      Don.t worry about the name. What this does is allow Vim to manage multiple buffers effectively.
+          * The current buffer can be put to the background without writing to disk;
+          * When a background buffer becomes current again, marks and undo-history are remembered.
+
+      Turn this on.
+
+      set hidden
+
+   2. Remap ` to '
+
+      These are very similar keys. Typing 'a will jump to the line in the current file marked with ma. However, `a will jump to the line and column marked with ma.
+
+      It is more useful in any case I can imagine, but it is located way off in the corner of the keyboard. The best way to handle this is just to swap them:
+
+      nnoremap ' `
+      nnoremap ` '
+
+   3. Map leader to ,
+
+      The leader character is your own personal modifier key, as g is Vim.s modifier key (when compared to vi). The default leader is \, but this is not located standardly on all keyboards and requires a pinky stretch in any case.
+
+      let mapleader = ","
+
+      <SPACE> is also a good choice. Note: you can of course have several .personal modifier keys. simply by mapping a sequence, but the leader key is handled more formally.
+   4. Keep a longer history
+
+      By default, Vim only remembers the last 20 commands and search patterns entered. It.s nice to boost this up:
+
+      set history=1000
+
+   5. Enable extended % matching
+
+      The % key will switch between opening and closing brackets. By sourcing matchit.vim, it can also switch among e.g. if/elsif/else/end, between opening and closing XML tags, and more.
+
+      runtime macros/matchit.vim
+
+      Note: runtime is the same as source except that the path is relative to the Vim installation directory.
+   6. Make file/command completion useful
+
+      By default, pressing <TAB> in command mode will choose the first possible completion with no indication of how many others there might be. The following configuration lets you see what your other options are:
+
+      set wildmenu
+
+      To have the completion behave similarly to a shell, i.e. complete only up to the point of ambiguity (while still showing you what your options are), also add the following:
+
+      set wildmode=list:longest
+
+Recommended .vimrc configuration items
+
+Most people like these.
+
+   1. Use case-smart searching
+
+      These two options, when set together, will make /-style searches case-sensitive only if there is a capital letter in the search expression. *-style searches continue to be consistently case-sensitive.
+
+      set ignorecase 
+      set smartcase
+
+      This is usually the most useful combination.
+   2. Set the terminal title
+
+      A running gvim will always have a window title, but when vim is run within an xterm, by default it inherits the terminal.s current title.
+
+      set title
+
+      This gives e.g. | page.html (~) - VIM |.
+   3. Maintain more context around the cursor
+
+      When the cursor is moved outside the viewport of the current window, the buffer is scrolled by a single line. Setting the option below will start the scrolling three lines before the border, keeping more context around where you.re working.
+
+      set scrolloff=3
+
+      Typing zz is also handy; it centers the window on the cursor without moving the cursor. (But watch out for ZZ!)
+   4. Store temporary files in a central spot
+
+      Swap files and backups are annoying but can save you a lot of trouble. Rather than spreading them all around your filesystem, isolate them to a single directory:
+
+      set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+      set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+
+      This is especially valuable after an unexpected reboot . you don.t have to track down all the leftover temp files. However: if you are editing files on a shared file system, it will be easier to clobber concurrent modifications, as other users. Vim processes processes will not see your swaps.
+   5. Scroll the viewport faster
+
+      <C-e> and <C-y> scroll the viewport a single line. I like to speed this up:
+
+      nnoremap <C-e> 3<C-e>
+      nnoremap <C-y> 3<C-y>
+
+   6. Enable limited line numbering
+
+      It.s often useful to know where you are in a buffer, but full line numbering is distracting. Setting the option below is a good compromise:
+
+      set ruler
+
+      Now in the bottom right corner of the status line there will be something like: 529, 35 68%, representing line 529, column 35, about 68% of the way to the end.
+   7. A bunch of stuff your OS should already do
+
+      If you are running Windows or OS X or a sloppy Linux distribution, you may not be using these:
+
+      " Intuitive backspacing in insert mode
+      set backspace=indent,eol,start
+       
+      " File-type highlighting and configuration.
+      " Run :filetype (without args) to see what you may have
+      " to turn on yourself, or just set them all to be sure.
+      syntax on
+      filetype on
+      filetype plugin on
+      filetype indent on
+       
+      " Highlight search terms...
+      set hlsearch
+      set incsearch " ...dynamically as they are typed.
+
+      The filetype lines enable type-specific configuration, such as knowledge of syntax and indentation. E.g. foo.c will be opened with Vim.s pre-configured C settings, and bar.py will be opened with Python settings.
+
+      If the search term highlighting gets annoying, set a key to switch it off temporarily:
+
+      nmap <silent> <leader>n :silent :nohlsearch<CR>
+
+   8. Catch trailing whitespace
+
+      The following will make tabs and trailing spaces visible when requested:
+
+      set listchars=tab:>-,trail:·,eol:$
+      nmap <silent> <leader>s :set nolist!<CR>
+
+      By default whitespace will be hidden, but now it can be toggled with ,s.
+   9. Stifle many interruptive prompts
+
+      The .Press ENTER or type command to continue. prompt is jarring and usually unnecessary. You can shorten command-line text and other info tokens with, e.g.:
+
+      set shortmess=atI
+
+      See :help shortmess for the breakdown of what this changes. You can also pare things down further if you like.
+  10. Stop distracting your co-workers
+
+      Vim is a little surly, beeping at you at every chance. You can either find a way to turn off the bell completely, or more usefully, make the bell visual:
+
+      set visualbell
+
+      Instead of emitting an obnoxious noise, the window will flash very briefly. This is similar to screen.s interpretation of the bell in its default configuration. 
+
+Here is my own .vimrc, which includes all these settings (and some more which are less generally useful). A fairly good source for other configuration tips is the Vim Tips Wiki.
+
+Thanks to Adam Katz and Chris Gaal for their input on a draft of this post.
+
+Posted November 6th, 2008. Feed, respond, trackback.
+16 Responses
+
+   1.
+
+      Oh great stuff.
+      vim is a great editor but the defaults stink.
+      Here are my settings:
+      http://www.pixelbeat.org/settings/.vimrc
+      Pádraig Brady - November 10th, 2008 at 11:35
+   2.
+
+      Very nice - thanks!
+      Keith - November 10th, 2008 at 11:46
+   3.
+
+      Pádraig, very nice. I didn.t know about wildignore or nojoinspaces.
+      Stephen Bach - November 10th, 2008 at 12:16
+   4.
+
+      I don.t often take the time to leave a note on a blog, but this time I had to. This is a good, useful post: some handy stuff about VIM I didn.t already know! Thanks!
+      Maxim - November 10th, 2008 at 12:35
+   5.
+
+      " you can also toggle through the matches by tab
+      set wildmode=list:longest,full
+
+      " use confirm instead of aborting an action
+      set confirm
+
+      " current directory is always matching the
+      " content of the active window
+      set autochdir
+
+      " remember some stuff after quiting vim:
+      " marks, registers, searches, buffer list
+      set viminfo='20,<50,s10,h,%
+
+      " use console dialogs instead of popup
+      " dialogs for simple choices
+      set guioptions+=c
+
+      Daniel - November 10th, 2008 at 13:20
+   6.
+
+      [...] http://items.sjbach.com/319/configuring-vim-right : quelques astuces pour Vim. [...]
+      Dev Blog AF83 » Blog Archive » Veille technologique : Merb 1.0, Microsoft, HTML5, etc. - November 10th, 2008 at 13:35
+   7.
+
+      Plugins I can.t live without:
+
+      toggle comments
+      http://www.vim.org/scripts/script.php?script_id=665
+
+      auto completion by tab
+      http://www.vim.org/scripts/script.php?script_id=182
+
+      svn/cvs/git integration
+      http://www.vim.org/scripts/script.php?script_id=90
+
+      fast switching between most recently used files
+      http://www.vim.org/scripts/script.php?script_id=42
+
+      fast switching between h/cpp
+      http://www.vim.org/scripts/script.php?script_id=31
+
+      Nice to have plugins:
+
+      emacs style quick copy and paste
+      http://www.vim.org/scripts/script.php?script_id=2064
+
+      auto completion in command mode from current file
+      http://www.vim.org/scripts/script.php?script_id=2222
+
+      see the classes, methods, functions,
+      macros defined in the file
+      http://www.vim.org/scripts/script.php?script_id=273
+      Daniel - November 10th, 2008 at 13:48
+   8.
+
+      Daniel, I didn.t know about confirm or autochdir . those could certainly be useful.
+      Stephen Bach - November 10th, 2008 at 14:53
+   9.
+
+      [...] items.sjbach.com » Configuring Vim right - These are the best non-standard options I have found or stolen from others over the years; listed below in order of descending usefulness - though I think everything in this post is worth skimming - are tips which should have value to anyone, no matter how they like to run Vim. That is, there is minimal editorializing. [...]
+      Anton Olsen.com » Blog Archive » Bookmarks for November 10th - November 10th, 2008 at 19:00
+  10.
+
+      I also rather like set expandtab and set smarttab, being someone who absolutely hates accidentally placing hard tab characters in source code.
+      Cale Gibbard - November 10th, 2008 at 19:34
+  11.
+
+      A big thank you for this!
+      Cristian - November 10th, 2008 at 20:11
+  12.
+
+      Perhaps number 5 would be better written as:
+
+      nnoremap 3
+      nnoremap 3
+      Alex Chapman - November 10th, 2008 at 20:36
+  13.
+
+      Damn, I knew that wouldn.t format properly. How about this:
+
+      nnoremap <C-e> 3<C-e>
+      nnoremap <C-y> 3<C-y>
+
+      Alex Chapman - November 10th, 2008 at 20:38
+  14.
+
+      nice instruc
+      rogers - November 10th, 2008 at 22:36
+  15.
+
+      Cale, me too. I like to handle this using autocmd Filetype so that it.s set at a finer granularity.
+
+      Alex, yes! I.ve modified the article. Thanks.
+      Stephen Bach - November 10th, 2008 at 23:18
+  16.
+
+      .The default leader is \, but this is not located standardly on all keyboards and requires a pinky stretch in any case. .
+
+      On UK/Ireland keyboards it.s just between left shift and Z, doesn.t even need shift. It.s positioned pleasingly roughly symmetrically with / on the right.
+      spispopd - November 11th, 2008 at 00:52
+

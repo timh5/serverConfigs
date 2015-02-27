@@ -1,0 +1,112 @@
+#!/bin/sh
+# Merge helper: merges current working directories' svn branch 
+# into another vyew  app version branch with given rev number
+# Can be used in 2 ways, pipe output from svn commit, or called
+# directly.
+
+VER=$1
+VYEWDIR=`echo ~vyew`
+
+## Check for "-ci" option = Commit after merge,
+## then erase "-ci" option from parameters list
+[ "$3" == "-ci" ] && DOCOMMIT=1 && set $1 $2 "";
+[ "$3" == "ci" ] && DOCOMMIT=1 && set $1 $2 "";
+[ "$2" == "-ci" ] && DOCOMMIT=1 && set $1 "";
+[ "$2" == "ci" ] && DOCOMMIT=1 && set $1 "";
+
+## If no second arg, assume user is piping in commit, 
+## so try to detect revision number
+if [ $VER ] && [ ! $2 ]; then
+	while read line ; do
+		echo $line
+		GETREV=`echo "$line"|grep 'Committed revision'`
+		## Output would look like: "Committed revision NNNN."
+		## If grep was successful, save that revision
+		[ $? == 0 ]&&REV=`echo "$line"|awk '{print $3}'|tr -d .`
+		read line;
+	done
+
+## Else use second arg as revision number, scrape off "r" at gront
+else
+	REV=$2;
+	#remove leading "r" if exists
+	[ "${REV:0:1}" == "r" ] && REV=${REV:1};
+	#remove trailing "." if exists
+	[ "${REV:${#REV}-1:1}" == "." ] && REV=${REV:0:${#REV}-1}
+fi
+
+## No args? Show help.
+if [ ! $REV ] || [ ! $VER ]; then
+	echo "ERROR: No SVN revisions detected, or passed"
+	echo ""
+	echo "Usage:	1. svn merge -m'some changes' | mergeto <Destination Vyew Version> [-ci]"
+	echo "      	2. mergeto <Destination Vyew Version> [SVN REVISION] [-ci]"
+	echo "Option: 	-ci = commit after merge"
+	echo ""
+	echo "Examples:	1. svn merge -m'some changes' | mergeto v3.77dev "
+	echo "        		- Merges the changes of the commit into ~vyew/httpdocs/v3.77dev"
+	echo "        	2.mergeto v3.77dev 9900 -ci"
+	echo "         		- merges changes from revision 9900 into ~vyew/httpdocs/v3.77dev"
+	echo "				- the commits"
+	exit 1;
+fi
+
+
+
+## If Version has a "/" in it, keep it as literal directory,
+## else assume its referring to ~vyew/httpdocs/VERSION/.../...
+WCPATH=$VER;
+CMD=`echo $VER|grep '/'`
+[ $? -ne 0 ] && WCPATH="$VYEWDIR/httpdocs/$VER"
+
+## Get source SVN URL (Source branch of merge)
+SRCSVN=`svn info|grep '^URL: svn' | cut -f2 -d' '`
+[ ! $SRCSVN ] && echo "ERROR: Source SVN of current directory is invalid ($SRCSVN)"
+[ ! $SRCSVN ] && echo "You must be in the current directory of the source to merge"
+[ ! $SRCSVN ] && exit 1;
+
+## Get app version of souce branch (eg. "v3.76")
+SRCVER=`echo "$SRCSVN"|sed -r 's/.*vyew.app.(v[^/]*).*/\1/'`
+
+## Get the part of the path after "deploy", 
+## (ie get "content/data" from ".../svn/sim/vyew/app/v3.76/deploy/content/data")
+WCPATH2=`echo "$SRCSVN"|sed -r 's/.*deploy\/?(.*)/\1/'`
+WCPATH="$WCPATH/$WCPATH2"
+
+## Now, turn the single revision number to a revision range, as required
+## by merge, eg 1111 becoems 1110:1111
+## If Revision has a ":" colon in it already, leave it alone
+CMD=`echo "$REV"|grep :`
+if [ $? -ne 0 ];then
+	LOWREV=`expr $REV - 1`
+	REV="$LOWREV:$REV"
+fi
+
+## Double check we have a valid range
+CMD="echo '$REV'|grep -E '^[0-9]*-[0-9]*$'"
+if [ $? -ne 0 ];then
+	echo "ERROR: Revision given ($REV), not correct format. "
+	exit 1;
+fi
+
+
+#############################################################################
+## RUN MERGE COMMAND
+echo "Merging FROM BRANCH   : $SRCVER"
+echo "Merging from REVISION : $REV"
+echo "Merging INTO WorkCopy : $WCPATH"
+svn merge -r$REV $SRCSVN $WCPATH
+[ $? -ne 0 ] && exit $?;
+
+## Do commit if needed
+CIMSG="Commit after merge from $SRCVER branch, revs $REV"
+if [ $DOCOMMIT ];then
+	echo $CIMSG;
+	svn ci -m "$CIMSG" $WCPATH
+else
+	echo ""
+	echo "Don't forget to commit!"
+	echo "To commit: svn ci -m \"$CIMSG\" $WCPATH"
+	echo "To diff  : svn diff $WCPATH | less" 
+fi
+

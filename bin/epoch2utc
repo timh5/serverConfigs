@@ -1,0 +1,11 @@
+#!/bin/sh
+#epoch2utc 1299918754  ---  returns GMT
+#epoch2utc 1299918754 pst ---  returns Pacific time
+
+if [ "$2" == "pst" ];then 
+	date -d "1970-01-01 $1 sec -8 hours" +"%Y-%m-%d %T"
+else
+	date -d "1970-01-01 $1 sec" +"%Y-%m-%d %T"
+fi
+
+

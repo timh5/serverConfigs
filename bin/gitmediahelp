@@ -1,0 +1,19 @@
+#!/bin/sh
+
+echo "
+
+Git Media Sync -- Help
+
+1. Make sure everything is committed in the deploy directories on live(if version exists on there), and on dev, and that they are both at the same version (Merge/pull if needed)
+2. Make sure all AS3 code is commited to git
+3. Recompile SWFs in release mode
+4. Upload SWFs to dev
+5. Check in SWFs on dev, in the commit log, put a note of the git ID that it was compiled from in step 1/2
+6. On dev, run: git media sync
+7. Test vyew on dev
+8. If version not already checked out on live, use git-make-new-workdir. Otherwise do a pull on live
+9. on live, run: git media sync
+10. run 'git status', if it shows the SWFs as modified, run "git co -- content/VyewMain.swf content/com"
+
+
+"

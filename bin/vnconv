@@ -1,0 +1,19 @@
+#!/bin/sh
+#Resize image file smaller, if over certain size
+#vnconv <imgname>
+SIZE_THRESH=100000;
+RESIZE_TO="600x800";   ## Max size, will maintain aspect ratio
+
+[ ! -e $1 ] && exit 1;
+
+while [ -f "$1" ];do
+
+	fsize=`ls -l "$1"|awk '{print $5}'`	
+	if [ $fsize -lt $SIZE_THRESH ];then
+		echo -e "\tSkip $1, size $fsize"
+	else
+		echo "Converting $1";
+		convert "$1" -resize $RESIZE_TO "$1"
+	fi
+	shift;
+done;

@@ -1,0 +1,16 @@
+It's saying it can't find a required perl class. first I check if it's in redhat, then if not, I go to cpan. The main class is usually the first two parts, so Class.MakeMethods (out of the highlighted parts). 
+
+# grep -i makemeth ~/yum.txt
+perl-Class-MakeMethods.noarch            1.01-1.2.el5.rf        rpmforge
+
+# yum install --enablerepo=rpmforge perl-Class-MakeMethods
+
+If it's not in yum (eg it's a more obscure perl class) then try cpan, pretty much everything ever should be in there, but sometimes the install doesn't work, since it's not specifically packaged for redhat:
+
+# cpan
+Terminal does not support AddHistory.
+
+cpan shell -- CPAN exploration and modules installation (v1.7602)
+ReadLine support available (try 'install Bundle::CPAN')
+
+cpan> install Class::MakeMethods

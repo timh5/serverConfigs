@@ -1,0 +1,911 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" version="-//W3C//DTD XHTML 1.1//EN" xml:lang="en">
+<head>
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+	<meta name="verify-v1" content="+Ntj422Jc4V03qgBqLYbF3LMvrursV0X2btn2Zoqn9w=" /> <!-- don't remove, google needs this always -->
+	<title>Fantasy Football: How To Manipulate a Yahoo! Autopick Draft | Bleacher Report</title>
+	
+		<meta name="keywords" content="Football, NFC East, Fantasy Football, Fantasy Sports, NFC, Fantasy"  />
+	
+	
+	<link href="/stylesheets/print_1222325444.css" media="print" rel="Stylesheet" type="text/css" />
+	<link href="/stylesheets/base_1222325444.css" media="screen" rel="Stylesheet" type="text/css" />
+	<script src="/javascripts/base_1222325444.js?1222325459" type="text/javascript"></script>
+	<link href="http://bleacherreport.com/articles/feed" rel="alternate" title="Bleacher Report RSS feed" type="application/rss+xml" />
+	
+	
+	
+</head>
+
+<body>
+	<script type="text/javascript" charset="utf-8">
+
+	//document.observe("br:article:create", function(event) { alert("Article with id " + (event.memo.id) + " was just created")});
+
+	BR.Article = new jActiveRecord ({
+		url: "/articles",
+		
+		has_many: { 
+			tags: function() { return BR.Tag },
+			comments: function() { return BR.ArticleComment }
+		},
+		
+		belongs_to: {
+			author: function() { return BR.User },
+			primary_image: function() { return BR.Image }
+		},
+		
+		observer_name_space: "br:article"
+		
+	});
+	
+	BR.Tag = new jActiveRecord({
+		url: "/tags",
+		
+		has_many: {
+			community_leaders: function() { return BR.User }
+		},
+		
+		observer_name_space: "br:tag"
+	});
+	
+	BR.User = new jActiveRecord({
+		url: "/users",
+		
+		functions: {
+			init: function () {
+				this.full_name = this.first_name + " " + this.last_name;
+				this.url = "/users/" + this.permalink;
+				this.profile_image = {};
+				
+				var filename = this.cached_public_filename.split(".");
+				filename[filename.size() - 2] = filename[filename.size() - 2] + "_medium";
+				this.profile_image.medium = filename.join(".");
+			},
+			full_name_function: function() { // just a demonstration!
+				return this.first_name + " " + this.last_name;
+			}
+		},
+		
+		observer_name_space: "br:user"
+		
+	});
+	
+	BR.Image = new jActiveRecord({
+		functions: {
+			init: function() {
+				this.cropped_url = this.url.replace("_gallery.", "_cropped.");
+				this.article_url = this.url.replace("_gallery.", "_article.");
+			}
+		},
+		
+		has_many_through: { // not implemented yet (or possibly ever!), just demo syntax!
+			tags: function() { return { 
+				has_many: BR.Tag, 
+				through: BR.Tagging 
+				} 
+			}
+		},
+		
+		validations: { // not implemented yet, just demo syntax!
+			has_title: {
+				check: function() {
+					return (this.title.length() > 10);
+				},
+				message: "The article title must be at least 10 characters long."
+			}
+		},
+		
+		observer_name_space: "br:image"
+	});
+	
+	BR.ArticleComment = new jActiveRecord({
+		has_many: {
+			children: function() { return BR.ArticleComment }
+		},
+		
+		belongs_to: {
+			user: function() { return BR.User }
+		},
+		
+		observer_name_space: "br:article_comment"
+		
+	});
+	
+	BR.ArticlePick = new jActiveRecord({
+		url: "/articles/:id/picks",
+		url_replacement: "article_id",
+		
+		belongs_to: {
+			user: function() { return BR.User },
+			article: function() { return BR.Article }
+		},
+		
+		observer_name_space: "br:article_pick"
+		
+	});
+	
+	BR.UserTagging = new jActiveRecord({
+		url: "/users/:id/taggings",
+		url_replacement: "user_id",
+		
+		belongs_to: {
+			user: function() { return BR.User },
+			tag: function() { return BR.Tag }
+		},
+		
+		observer_name_space: "br:user_tagging"
+		
+	})
+	
+</script>
+	
+	<div id="sitewrapper" class="articles show">
+		<div id="header">
+			<a id="logo" href="/">Bleacher Report. The Open Source Sports Network</a>
+
+      			<div class="ad"><div id='banner_ad'>
+	    <!-- FM Leaderboard Zone -->
+<script type='text/javascript'>
+var federated_media_section = '';
+</script>
+<script type='text/javascript' src='http://static.fmpub.net/zone/
+1414'></script>
+<!-- FM Leaderboard Zone -->
+</div>
+</div>
+
+			<form id="search-box" action="/articles" method="get">
+				<fieldset id="query-tag-chooser">
+					<input type="text" id="query-tag-chooser-query" autocomplete="off" name="query" />
+					<button type="submit">Go!</button>
+					<div id="query-tag-search-results">
+						<ul id="query-tag-search-results-list">
+						</ul>
+					</div>
+				</fieldset>
+				<script type="text/javascript" charset="utf-8">
+				new BR.SearchSuggestions("query", { selectedBox: false, hiddenField: false, queryFieldText: "Search for people, teams, and more...", on_add: BR.selectSearchTag });
+				</script>
+			</form>
+
+			<ul id="primary-nav"><li><a href="/" class="navlink first current"><span>Sports</span></a></li><li><a href="/accounts/new" class="navlink"><span>Write</span></a></li><li><a href="/accounts/new" class="navlink"><span>Edit</span></a></li><li><a href="/accounts/new" class="navlink"><span>Lineup</span></a></li><li><a href="/activities" class="navlink"><span>Play-by-Play</span></a></li><li><a href="/about" class="navlink"><span>About</span></a></li><li><a href="/accounts/new" class="navlink last"><span>Sign Up</span></a></li></ul>
+			<ul id="secondary-nav">
+	
+		<li><a href="/"><span>Front Page</span></a></li>
+		
+			
+				
+				<li><a href="/mlb"><span>MLB</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/nfl"><span>NFL</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/college-football"><span>NCAA-FB</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/college-basketball"><span>NCAA-BB</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/nba"><span>NBA</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/nhl"><span>NHL</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/mma"><span>MMA</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/formula-1"><span>F1</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/nascar"><span>NASCAR</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/world-football"><span>FIFA</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/tennis"><span>Tennis</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/golf"><span>Golf</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/pro-wrestling"><span>Wrestling</span></a></li>
+				
+			
+		
+			
+				
+				<li><a href="/bleacher-report"><span>BR Chatter</span></a></li>
+				
+			
+		
+	
+</ul>
+
+		  
+		    
+		  <div id="inline-login">
+			<form action="/login" method="post">
+				<input id="inline-login-email" name="user[email]" class="email hint" type="text" value="Email Address" />
+				<input id="inline-login-password" name="user[password]" class="password hint" type="password" value="Password" />
+        <!-- <button>Login &raquo;</button> -->
+				<input type="image" src="/images/btn_login-inline.gif" class="button" />
+			</form>
+			  <div class="forgot-password"><a href="/account/forgot_password">Forgot password?</a></div>
+			</div>
+			
+		  
+
+			
+
+      <p id="breadcrumb"><span><a href="/fantasy">Fantasy</a> &raquo; <strong>  <a href="/fantasy-football">Fantasy Football</a> </strong></span></p>
+		</div>
+
+	  
+      <div style="clear:both">
+      
+      </div>
+	  
+
+			<script type="text/javascript" charset="utf-8">
+	
+	BR.currentArticle = BR.Article.load({"comments_count": 6, "body": "\u003Cp\u003ELet me begin this article by stating that, if given the option, it is \u003Cem\u003Ealways \u003C/em\u003Ebetter to do a live draft than to have it autopicked for you.\u003C/p\u003E\r\n\u003Cp\u003EWith that said, there will be times that you just can't make a draft. In fact, maybe your league is just an autopick draft anyway. In either case, there are ways to ensure you get the advantage over the other people in your league.\u003C/p\u003E\r\n\u003Cp\u003EAn article I read last year on Yahoo! Sports (to the best of my knowledge it is no longer there) outlined what I am going to explain here. Last year, I didn't get the opportunity to try it out because I already had four teams, which is the maximum number you can have on Yahoo! I took down notes, did a little bit of my own research, and kept those notes in my filing cabinet for this year.\u003C/p\u003E\r\n\u003Cp\u003EHere's the deal: in a yahoo public league, there are always ten teams with the same position configuration (QB, WR, WR, WR, RB, RB, TE, K, DEF, BEN, BEN, BEN, BEN, BEN, BEN). As is stated on the \u003Ca href=\"http://help.yahoo.com/l/us/yahoo/footballplus/rules/rules-07.html\"\u003EYahoo! fantasy football help page\u003C/a\u003E, \u003Cem\u003E\"Given this system, \u003Cstrong\u003Eit's important to remember that all starting positions are filled before any bench players are chosen.\u003C/strong\u003E Additionally, keep in mind that the system will determine a maximum number of players to draft per position (starters plus bench) so that no roster ends up with an inordinate number of players at any single position (e.g., five quarterbacks in a league that has a single starting quarterback).\"\u003C/em\u003E\u003C/p\u003E\r\n\u003Cp\u003EWhat this means to you is that in the first nine rounds, your starting roster will always be filled before more position players are added. This usually means that in rounds seven through nine, the computer will pick for you a tight end, a kicker, and\u0026nbsp;a defense.\u003C/p\u003E\r\n\u003Cp\u003ESince\u0026nbsp;there are ten teams with two starting RB positions, exactly twenty running backs will be picked within the first six rounds in most cases. What this means for you is that there are still top-25 running backs on the board while other teams are picking tight ends, kickers, and defenses in rounds seven, eight, and nine.\u003C/p\u003E\r\n\u003Cp\u003ESo how do you manipulate a Yahoo! autopick draft?\u003C/p\u003E\r\n\u003Cp\u003EWhen you are setting your pre-rankings, do this:\u003C/p\u003E\r\n\u003Col\u003E\r\n\u003Cli\u003EAdd all kickers to the \"do not draft\" list.\u003C/li\u003E\r\n\u003Cli\u003EAdd all defenses except for the top-tier defenses (Minnesota and San Diego, and New England as well if you wish) to the \"do not draft\" list.\u003C/li\u003E\r\n\u003Cli\u003EAdd all tight ends except for the top-tier tight ends (Antonio Gates, Jason Witten, Kellen Winslow, and Jeremy Shockey if you wish) to the \"do not draft\" list.\u003C/li\u003E\r\n\u003C/ol\u003E\r\n\u003Cp\u003EWhat this does is force the computer to pick other quality players (read: running backs) during rounds seven through nine while the other teams are taking tight ends, kickers, and defenses.\u003C/p\u003E\r\n\u003Cp\u003ESo, when setting your actual pre-rankings, this is how I did it:\u003C/p\u003E\r\n\u003Col\u003E\r\n\u003Cli\u003EPut the top 15 running backs first (in this group, I do not include Willie Parker. I picked him last year, and while he put up a ton of yards, he had very few touchdowns. This year, Pittsburgh drafted Rashard Mendenhall in the first round, who is expected to be Jerome Bettis for them. I see Parker getting fewer yards this year and even fewer touchdowns than before. If you want a Pittsburgh RB, go take Rashard Mendenhall later.)\u003C/li\u003E\r\n\u003Cli\u003EFor the next 25 spots, put the best WRs, QBs, and top tier TEs available.\u003C/li\u003E\r\n\u003Cli\u003ENow, put in the top tier defenses (Minnesota and Baltimore). \u003C/li\u003E\r\n\u003Cli\u003EFor the next 20 spots, put in the top 20 RBs available.\u003C/li\u003E\r\n\u003Cli\u003EFor the last 25 spots, put the best WRs available.\u003C/li\u003E\r\n\u003C/ol\u003E\r\n\u003Cp\u003EDoing this, assuming you have a mid-round spot, it is very likely you will get two high-quality RBs in the first two rounds, three good WRs and a good QB in the next four rounds, an elite defense in round seven, two more top 25 RBs in rounds eight and nine (this is ensured because while you're taking RBs, the other nine teams are taking defenses and kickers), two more decent WRs and a good backup QB in rounds eleven through thirteen, and in rounds fourteen and fifteen either two of the best WRs available at this point, or the best RBs left on the board.\u003C/p\u003E\r\n\u003Cp\u003EIn my league, I got stuck with the 9th overall pick. This isn't desirable, but in a snaking draft this also means I'm picking three more turns later. Here's how it broke down for me:\u003C/p\u003E\r\n\u003Cul\u003E\r\n\u003Cli\u003ERound 1, pick 9: Marion Barber\u003C/li\u003E\r\n\u003Cli\u003ERound 2, pick 2: Clinton Portis\u003C/li\u003E\r\n\u003Cli\u003ERound 3, pick 9: Larry Fitzgerald\u003C/li\u003E\r\n\u003Cli\u003ERound 4, pick 2: Marques Colston\u003C/li\u003E\r\n\u003Cli\u003ERound 5, pick 9: Derek Anderson\u003C/li\u003E\r\n\u003Cli\u003ERound 6, pick 2: Roddy White\u003C/li\u003E\r\n\u003Cli\u003ERound 7, pick 9: Minnesota Defense\u003C/li\u003E\r\n\u003Cli\u003ERound 8, pick 2: San Diego Defense\u003C/li\u003E\r\n\u003Cli\u003ERound 9, pick 9: Earnest Graham\u003C/li\u003E\r\n\u003Cli\u003ERound 10, pick 2: Donald Driver\u003C/li\u003E\r\n\u003Cli\u003ERound 11, pick 9: Santana Moss\u003C/li\u003E\r\n\u003Cli\u003ERound 12, pick 2: Matt Schaub\u003C/li\u003E\r\n\u003Cli\u003ERound 13, pick 9: Selvin Young\u003C/li\u003E\r\n\u003Cli\u003ERound 14, pick 2: Julius Jones\u003C/li\u003E\r\n\u003Cli\u003ERound 15, pick 9: Rashard Mendenhall\u003C/li\u003E\r\n\u003C/ul\u003E\r\n\u003Cp\u003EA few notes on this draft:\u003C/p\u003E\r\n\u003Cul\u003E\r\n\u003Cli\u003EI was assured an elite defense in round seven because in this round, most teams were taking tight ends. At this point, all the elite tight ends that I did not put in the \"do not draft\" list were taken by other players who had placed them too high in their pre-draft rankings (as in round four). Since I had no tight ends for the computer to pick, it was forced to go to the next best open position left, which was defense. None of the other teams picked a defense until round eight. The only reason I ended up getting two elite defenses was because I was picking second in the eighth round.\u003C/li\u003E\r\n\u003Cli\u003EIn round nine, every other team chose a kicker. While they were doing that, I picked up Earnest Graham. \u003C/li\u003E\r\n\u003C/ul\u003E\r\n\u003Cp\u003ESince there tends to be very negligible difference between elite kickers and no-name kickers in the long run, it is better to try to get as many position players as needed and eventually drop one of them to add a kicker before week one. In a ten team league, someone at least decent will be available in free agency for sure.\u003C/p\u003E\r\n\u003Cp\u003EAgain in rounds thirteen through fifteen, the computer for the other nine teams went TE-K-DEF for backup players. In these rounds, I got Selvin Young, Julius Jones, and Rashard Mendenhall - all top 50 RBs who the other teams missed out on because they were taking unnecessary backups.\u003C/p\u003E\r\n\u003Cp\u003EJust to make a point:\u003C/p\u003E\r\n\u003Cul\u003E\r\n\u003Cli\u003EIn free agency, the top four TEs available are Marcedes Lewis, Randy McMichael, Desmond Clark, and Jerramy Stevens - all useful TEs. I could add one of them and a guy like John Carlson or Dustin Keller as a backup.\u003C/li\u003E\r\n\u003Cli\u003EAlso, there are numerous useful Ks available. I could add Josh Brown, Matt Stover, Kris Brown, or John Kasay if I want.\u003C/li\u003E\r\n\u003Cli\u003EI could instead trade one of my defenses since it really isn't necessary to carry two elite defenses like that. Moving San Diego and and another player for a high-end WR or RB (or TE for that matter) could end up being a good course of action for me.\u003C/li\u003E\r\n\u003C/ul\u003E\r\n\u003Cp\u003EWhatever the case, drafting like this creates many good possibilities and gives you a much better team in general than any other team in the league.\u003C/p\u003E", "tags": [{"type": "Sport", "taggings_count": 8731, "synonyms": null, "community_leaders": [], "name": "Football", "in_tag1_id": null, "id": 6}, {"type": "Division", "taggings_count": 2305, "synonyms": "", "community_leaders": [], "name": "NFC East", "in_tag1_id": 16, "id": 45}, {"type": "Team", "taggings_count": 647, "synonyms": "", "community_leaders": [{"is_editor": true, "email": "jacob@fantasyfootballfools.com", "last_name": "Sloan", "first_name": "Jacob", "id": 7537}], "name": "Fantasy Football", "in_tag1_id": 7020, "id": 2390}, {"type": "Person", "taggings_count": 359, "synonyms": "", "community_leaders": [{"is_editor": true, "email": "elmhurstpubroundtable@yahoo.com", "last_name": "", "first_name": "The Roundtable", "id": 20760}], "name": "Fantasy Sports", "in_tag1_id": null, "id": 3078}, {"type": null, "taggings_count": 79, "synonyms": null, "community_leaders": [], "name": "NFC", "in_tag1_id": null, "id": 6666}, {"type": "League", "taggings_count": 955, "synonyms": "", "community_leaders": [{"is_editor": true, "email": "elmhurstpubroundtable@yahoo.com", "last_name": "", "first_name": "The Roundtable", "id": 20760}], "name": "Fantasy", "in_tag1_id": null, "id": 7020}], "primary_image": {"tag_list": "", "url": "/images_root/image_pictures/0063/2824/lol_gallery.jpg", "id": 83839}, "author_id": 15749, "blurb": "Chris Olley reveals a sure-fire method of autopick drafting that will easily give you the advantage over every other team in your league on your quest for fantasy football greatness.", "feed_article_url": null, "created_at": "2008/07/28 06:57:42 -0700", "has_been_star_rated": true, "title": "Fantasy Football: How To Manipulate a Yahoo! Autopick Draft", "id": 41694, "hit_count": 1415, "updated_at": "2008/08/13 12:52:18 -0700", "author": {"is_editor": true, "email": "mustbechris@yahoo.com", "last_name": "Olley", "first_name": "Chris", "id": 15749}});
+	
+</script>
+<script src="/javascripts/show_article.js?1222325444" type="text/javascript"></script>
+<div id="content" class="t2">
+	
+	
+	<h1 id="article-title">Fantasy Football: How To Manipulate a Yahoo! Autopick Draft</h1>
+	<div id="byline-hidden">Chris Olley reveals a sure-fire method of autopick drafting that will easily give you the advantage over every other team in your league on your quest for fantasy football greatness.</div>
+
+	<div id="col1">
+
+		<div id="meta">
+			<p class="user"><a href="/users/15749-Chris-Olley" class="user-photo"><img class='profile_photo' src='/images_root/user_pictures/0001/9682/biron_small.jpg'/></a></a> <strong>by</strong> <a href="/users/15749-Chris-Olley" class="author" target="_parent">Chris Olley</a> (Scribe)</p>
+			<a class="comments" href="#comments">6</a>
+			<p class="views">1415 reads</p>
+			<p class="tag">Sports</p>
+			<p class="date">July 28, 2008</p>
+		</div>
+		
+		
+		<img class="article-photo" src="/images_root/image_pictures/0063/2824/lol_feature.jpg" height="233" width="350" alt="Football, NFC East, Fantasy Football, Fantasy Sports, NFC, Fantasy" />
+		
+
+		<div id="share-story">
+			<h3>Share this Story</h3>
+			<ul>
+				<li class="btn_buzz"><script showbranding="0" src="http://d.yimg.com/ds/badge.js" badgetype="text">bleacher_repo551:http://bleacherreport.com/articles/41694</script></li>
+				<li class="btn_digg"><a href="http://digg.com/submit?url=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft&title=Fantasy Football: How To Manipulate a Yahoo! Autopick Draft&bodytext=Chris Olley reveals a sure-fire method of autopick drafting that will easily give you the advantage over every other team in your league on your quest for fantasy football greatness.&topic=Football" class="btn_digg" onclick="window.open(this.href,'digg_window','height=650,width=1200,scrollbars=yes');return false;">Digg</a></li>
+				<li class="btn_facebook"><script>
+function fbs_click() {
+	u=location.href;
+	t=document.title;window.open('http://www.facebook.com/sharer.php?u=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft'+''+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
+	return false;
+}
+</script>
+<a href="http://www.facebook.com/share.php?u=http://www.facebook.com/sharer.php?u=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft" onclick="return fbs_click()" target="_blank" class="btn_facebook">Facebook</a></li>
+				<li class="btn_stumbleupon"><a href="http://www.stumbleupon.com/submit?url=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft" class="btn_stumbleupon" onclick="window.open(this.href,'su_window','height=650,width=1200,scrollbars=yes');return false;">StumbleUpon</a></li>
+				<li class="btn_print"><a href="#" onclick="window.print()">Print</a></li>
+				<li class="btn_email"><a href="/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft/email_article" onclick="window.open(this.href,'new_window_name','height=530,width=480,scrollbars=yes');return false;">Email</a></li>
+			</ul>
+		</div>
+
+		<div id="article-body">
+			
+				
+				<p>Let me begin this article by stating that, if given the option, it is <em>always </em>better to do a live draft than to have it autopicked for you.</p>
+<p>With that said, there will be times that you just can't make a draft. In fact, maybe your league is just an autopick draft anyway. In either case, there are ways to ensure you get the advantage over the other people in your league.</p>
+<p>An article I read last year on Yahoo! Sports (to the best of my knowledge it is no longer there) outlined what I am going to explain here. Last year, I didn't get the opportunity to try it out because I already had four teams, which is the maximum number you can have on Yahoo! I took down notes, did a little bit of my own research, and kept those notes in my filing cabinet for this year.</p>
+<p>Here's the deal: in a yahoo public league, there are always ten teams with the same position configuration (QB, WR, WR, WR, RB, RB, TE, K, DEF, BEN, BEN, BEN, BEN, BEN, BEN). As is stated on the <a href="http://help.yahoo.com/l/us/yahoo/footballplus/rules/rules-07.html">Yahoo! fantasy football help page</a>, <em>"Given this system, <strong>it's important to remember that all starting positions are filled before any bench players are chosen.</strong> Additionally, keep in mind that the system will determine a maximum number of players to draft per position (starters plus bench) so that no roster ends up with an inordinate number of players at any single position (e.g., five quarterbacks in a league that has a single starting quarterback)."</em></p>
+<p>What this means to you is that in the first nine rounds, your starting roster will always be filled before more position players are added. This usually means that in rounds seven through nine, the computer will pick for you a tight end, a kicker, and&nbsp;a defense.</p>
+<p>Since&nbsp;there are ten teams with two starting RB positions, exactly twenty running backs will be picked within the first six rounds in most cases. What this means for you is that there are still top-25 running backs on the board while other teams are picking tight ends, kickers, and defenses in rounds seven, eight, and nine.</p>
+<p>So how do you manipulate a Yahoo! autopick draft?</p>
+<p>When you are setting your pre-rankings, do this:</p>
+<ol>
+<li>Add all kickers to the "do not draft" list.</li>
+<li>Add all defenses except for the top-tier defenses (Minnesota and San Diego, and New England as well if you wish) to the "do not draft" list.</li>
+<div id="top-related-stories">
+	<h3>Today's Must Reads</h3>
+	
+		
+		<div class="story">
+			<div class="story-media"><a href="/articles/60670-the-10-most-underrated-footballers-in-europe"><img src="/images_root/image_pictures/0092/8289/seedorf_medium.jpg" alt="" /></a></div>
+			<h2><a href="/articles/60670-the-10-most-underrated-footballers-in-europe">The 10 Most Underrated Footballers in Europe</a></h2>
+		</div>
+		
+		
+		<div class="hr"><hr /></div>
+		
+		<div class="story">
+			<div class="story-media"><a href="/articles/60514-news-report-usc-trojans-will-not-qualify-for-bcs-title-game-due-to-schedule"><img src="/images_root/image_pictures/0092/6737/oj_vs_beban_medium.jpg" alt="" /></a></div>
+			<h2><a href="/articles/60514-news-report-usc-trojans-will-not-qualify-for-bcs-title-game-due-to-schedule">Why the USC Trojans Won't Qualify for the BCS Title Game</a></h2>
+		</div>
+		
+		
+		<div class="hr"><hr /></div>
+		
+		<div class="story">
+			<div class="story-media"><a href="/articles/60856-bleacher-report-nfl-power-rankings-week-four"><img src="/images_root/image_pictures/0093/1753/nflbrshield_feature_medium.jpg" alt="" /></a></div>
+			<h2><a href="/articles/60856-bleacher-report-nfl-power-rankings-week-four">Bleacher Report NFL Power Rankings: Week Four</a></h2>
+		</div>
+		
+</div><li>Add all tight ends except for the top-tier tight ends (Antonio Gates, Jason Witten, Kellen Winslow, and Jeremy Shockey if you wish) to the "do not draft" list.</li>
+</ol>
+<p>What this does is force the computer to pick other quality players (read: running backs) during rounds seven through nine while the other teams are taking tight ends, kickers, and defenses.</p>
+<p>So, when setting your actual pre-rankings, this is how I did it:</p>
+<ol>
+<li>Put the top 15 running backs first (in this group, I do not include Willie Parker. I picked him last year, and while he put up a ton of yards, he had very few touchdowns. This year, Pittsburgh drafted Rashard Mendenhall in the first round, who is expected to be Jerome Bettis for them. I see Parker getting fewer yards this year and even fewer touchdowns than before. If you want a Pittsburgh RB, go take Rashard Mendenhall later.)</li>
+<li>For the next 25 spots, put the best WRs, QBs, and top tier TEs available.</li>
+<li>Now, put in the top tier defenses (Minnesota and Baltimore). </li>
+<li>For the next 20 spots, put in the top 20 RBs available.</li>
+<li>For the last 25 spots, put the best WRs available.</li>
+</ol>
+<p>Doing this, assuming you have a mid-round spot, it is very likely you will get two high-quality RBs in the first two rounds, three good WRs and a good QB in the next four rounds, an elite defense in round seven, two more top 25 RBs in rounds eight and nine (this is ensured because while you're taking RBs, the other nine teams are taking defenses and kickers), two more decent WRs and a good backup QB in rounds eleven through thirteen, and in rounds fourteen and fifteen either two of the best WRs available at this point, or the best RBs left on the board.</p>
+<p>In my league, I got stuck with the 9th overall pick. This isn't desirable, but in a snaking draft this also means I'm picking three more turns later. Here's how it broke down for me:</p>
+<ul>
+<li>Round 1, pick 9: Marion Barber</li>
+<li>Round 2, pick 2: Clinton Portis</li>
+<li>Round 3, pick 9: Larry Fitzgerald</li>
+<li>Round 4, pick 2: Marques Colston</li>
+<li>Round 5, pick 9: Derek Anderson</li>
+<li>Round 6, pick 2: Roddy White</li>
+<li>Round 7, pick 9: Minnesota Defense</li>
+<li>Round 8, pick 2: San Diego Defense</li>
+<li>Round 9, pick 9: Earnest Graham</li>
+<li>Round 10, pick 2: Donald Driver</li>
+<li>Round 11, pick 9: Santana Moss</li>
+<li>Round 12, pick 2: Matt Schaub</li>
+<li>Round 13, pick 9: Selvin Young</li>
+<li>Round 14, pick 2: Julius Jones</li>
+<li>Round 15, pick 9: Rashard Mendenhall</li>
+</ul>
+<p>A few notes on this draft:</p>
+<ul>
+<li>I was assured an elite defense in round seven because in this round, most teams were taking tight ends. At this point, all the elite tight ends that I did not put in the "do not draft" list were taken by other players who had placed them too high in their pre-draft rankings (as in round four). Since I had no tight ends for the computer to pick, it was forced to go to the next best open position left, which was defense. None of the other teams picked a defense until round eight. The only reason I ended up getting two elite defenses was because I was picking second in the eighth round.</li>
+<li>In round nine, every other team chose a kicker. While they were doing that, I picked up Earnest Graham. </li>
+</ul>
+<p>Since there tends to be very negligible difference between elite kickers and no-name kickers in the long run, it is better to try to get as many position players as needed and eventually drop one of them to add a kicker before week one. In a ten team league, someone at least decent will be available in free agency for sure.</p>
+<p>Again in rounds thirteen through fifteen, the computer for the other nine teams went TE-K-DEF for backup players. In these rounds, I got Selvin Young, Julius Jones, and Rashard Mendenhall - all top 50 RBs who the other teams missed out on because they were taking unnecessary backups.</p>
+<p>Just to make a point:</p>
+<ul>
+<li>In free agency, the top four TEs available are Marcedes Lewis, Randy McMichael, Desmond Clark, and Jerramy Stevens - all useful TEs. I could add one of them and a guy like John Carlson or Dustin Keller as a backup.</li>
+<li>Also, there are numerous useful Ks available. I could add Josh Brown, Matt Stover, Kris Brown, or John Kasay if I want.</li>
+<li>I could instead trade one of my defenses since it really isn't necessary to carry two elite defenses like that. Moving San Diego and and another player for a high-end WR or RB (or TE for that matter) could end up being a good course of action for me.</li>
+</ul>
+<p>Whatever the case, drafting like this creates many good possibilities and gives you a much better team in general than any other team in the league.</p>
+				
+					</div>
+
+		<script src="/javascripts/star_rating.js"></script>
+<script type="text/javascript" charset="utf-8">
+	BR.currentArticle.starRating = new BR.starRating ({
+		container_element: $('ratings-and-picks'),
+		current_rating: 0,
+		article_id: 41694, 
+		author_id: 15749, 
+		current_user_id: 4, 
+		on_results: function() {}, 
+		on_loading: function() {}
+	});
+</script>
+		
+		<script src="/javascripts/article_picks.js"></script>
+<script type="text/javascript" charset="utf-8">
+	BR.currentArticle.myPicks = new BR.ArticlePicksController({
+		user_id: 4,
+		article_id: 41694,
+		author_id: 15749,
+		pick: null
+	});
+</script>
+
+
+		<div id="article-tools">
+			<p class="tag">Sports</p>
+			<p class="views">1415 views</p>
+
+			<div id="article-share">
+				<h3>Share:</h3>
+				<ul>
+					<li id="btn_buzz-fix"><script showbranding="0" src="http://d.yimg.com/ds/badge.js" badgetype="text">bleacher_repo551:http://bleacherreport.com/articles/41694</script></li>
+					<li><a href="http://digg.com/submit?url=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft&title=Fantasy Football: How To Manipulate a Yahoo! Autopick Draft&bodytext=Chris Olley reveals a sure-fire method of autopick drafting that will easily give you the advantage over every other team in your league on your quest for fantasy football greatness.&topic=Football" class="btn_digg" onclick="window.open(this.href,'digg_window','height=650,width=1200,scrollbars=yes');return false;">Digg</a></li>
+					<li><a href="http://www.stumbleupon.com/submit?url=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft" class="btn_stumbleupon" onclick="window.open(this.href,'su_window','height=650,width=1200,scrollbars=yes');return false;">StumbleUpon</a></li>
+					<li><script>
+function fbs_click() {
+	u=location.href;
+	t=document.title;window.open('http://www.facebook.com/sharer.php?u=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft'+''+'&t='+encodeURIComponent(t),'sharer','toolbar=0,status=0,width=626,height=436');
+	return false;
+}
+</script>
+<a href="http://www.facebook.com/share.php?u=http://www.facebook.com/sharer.php?u=http://bleacherreport.com/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft" onclick="return fbs_click()" target="_blank" class="btn_facebook">Facebook</a></li>
+					<li><a href="/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft/email_article" class="btn_email" onclick="window.open(this.href,'new_window_name','height=530,width=480,scrollbars=yes');return false;">Email</a></li>
+					<li><a href="#" class="btn_print" onclick="window.print()">Print</a></li>
+				</ul>
+			</div>
+		</div>
+
+		
+			
+				<div id="comments">
+	<h2>comments <strong>(6)</strong> <small><a href="#" onclick="Effect.toggle('new-comment-top', 'blind', { duration: 0.2 }); return false;">write a comment &raquo;</a></small></h2>
+	<div id="new-comment-top" style="display: none;">
+		<div class="comment-new">
+	<h2>write a new comment</h2>
+
+<form action="/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft/comments" id="new_comment_form" method="post">
+	<textarea cols="40" id="comment_body" name="comment[body]" rows="20"></textarea><br />
+	<input id="post_comment_button" name="commit" type="submit" value="Submit comment" />
+</form>
+</div>
+	</div>
+
+<ol class="comments">
+
+	<li class="comment odd" id="comment_0">
+	<div class="comment-author">
+	<a onclick="BR.showCommentReply(41694, 177300, 0); return false;" href="#" class="reply">reply to comment</a>
+	<cite>
+		
+			<a href="/users/37440-Casey-Fenton" class="user-icon"><img class='profile_photo' src='/images_root/user_pictures/0003/7091/apr29_5_comment.jpg'/></a>
+			<a href="/users/37440-Casey-Fenton" class="user-name">by <b>Casey</b></a><br />
+			<a href="#comment_177300" class="comment-anchor">about 1 month ago</a>
+		
+	</cite>
+	</div>
+
+	<div class="comment-content">
+		<p>Good analysis on the autopick system. I hope most leagues allow a manual pick though. The draft process is often times as fun as the regular season!</p>
+		
+		
+	</div>
+
+	<div class="comment-reply" id="comment_response_0" style="display: none;"></div>
+
+
+	<ol class="comment reply">
+	
+		<li class="comment odd" id="comment_177330" >
+			<div class="comment-author">
+				<cite>
+				
+				<a href="/users/15749-Chris-Olley" class="user-icon"><img class='profile_photo' src='/images_root/user_pictures/0001/9682/biron_comment.jpg'/></a>
+				<a href="/users/15749-Chris-Olley" class="user-name">by <b>Chris</b></a><br>
+					<a href="#comment_177330" class="comment-anchor">from about 1 month ago</a>
+				
+				</cite>
+			</div>
+			<div class="comment-content">
+				<p>Absolutely, I love the drafting part. Live draft is always the optimal choice, but if you have to autopick, this is a good way to try to get the advantage.</p>
+				
+				
+			</div>
+		</li>
+	
+	</ol>
+
+</li>
+
+	<li class="comment even" id="comment_1">
+	<div class="comment-author">
+	<a onclick="BR.showCommentReply(41694, 177594, 1); return false;" href="#" class="reply">reply to comment</a>
+	<cite>
+		
+			<a href="/users/20913-Chris-Hester" class="user-icon"><img class='profile_photo' src='/images_root/user_pictures/0002/3602/2325_comment.jpg'/></a>
+			<a href="/users/20913-Chris-Hester" class="user-name">by <b>Chris</b></a><br />
+			<a href="#comment_177594" class="comment-anchor">about 1 month ago</a>
+		
+	</cite>
+	</div>
+
+	<div class="comment-content">
+		<p>Calling All Bleacher Report "Fantasy Experts" </p>
+
+<p>Are you interested in joining a Bleacher Report football league on RotoHog? If so, please email me at wrongarm300@yahoo.com. I am trying to get as many Bleacher Report writers as possible so if you know anyone else that may be interested, have them contact me as well!! Let's make this huge and represent the Bleacher!!</p>
+
+<p></p>
+		
+		
+	</div>
+
+	<div class="comment-reply" id="comment_response_1" style="display: none;"></div>
+
+
+</li>
+
+	<li class="comment odd" id="comment_2">
+	<div class="comment-author">
+	<a onclick="BR.showCommentReply(41694, 215100, 2); return false;" href="#" class="reply">reply to comment</a>
+	<cite>
+		
+			<a href="/users/44782-Tim-Brown" class="user-icon"><img class='profile_photo' src='/images/default-user-icon-comment.png'/></a>
+			<a href="/users/44782-Tim-Brown" class="user-name">by <b>Tim</b></a><br />
+			<a href="#comment_215100" class="comment-anchor">about 1 month ago</a>
+		
+	</cite>
+	</div>
+
+	<div class="comment-content">
+		<p>I followed this exactly as it states.  Do not do it!!!!!! I ended up with 8 qb's as my bench players and none of them even play.  Now I am scraping for any sort of back ups off of waivers. I do not recommend following his advice.  I have won my league the last two years now am sure I won't.
+<br />      </p>
+		
+		
+	</div>
+
+	<div class="comment-reply" id="comment_response_2" style="display: none;"></div>
+
+
+	<ol class="comment reply">
+	
+		<li class="comment odd" id="comment_235143" >
+			<div class="comment-author">
+				<cite>
+				
+				<a href="/users/48072-Warrr-Eagle" class="user-icon"><img class='profile_photo' src='/images/default-user-icon-comment.png'/></a>
+				<a href="/users/48072-Warrr-Eagle" class="user-name">by <b>Warrr</b></a><br>
+					<a href="#comment_235143" class="comment-anchor">from 27 days ago</a>
+				
+				</cite>
+			</div>
+			<div class="comment-content">
+				<p>why didn't you exclude all the worthless QBs? when you were sorting them, did you look at only the top 25 and forget about he rest of the QBs in the league?</p>
+				
+				
+			</div>
+		</li>
+	
+	</ol>
+
+</li>
+
+	<li class="comment even" id="comment_3">
+	<div class="comment-author">
+	<a onclick="BR.showCommentReply(41694, 229194, 3); return false;" href="#" class="reply">reply to comment</a>
+	<cite>
+		
+			<a href="/users/47112-E-Dubs" class="user-icon"><img class='profile_photo' src='/images/default-user-icon-comment.png'/></a>
+			<a href="/users/47112-E-Dubs" class="user-name">by <b>E</b></a><br />
+			<a href="#comment_229194" class="comment-anchor">about 1 month ago</a>
+		
+	</cite>
+	</div>
+
+	<div class="comment-content">
+		<p>I used this strategy last year for one of my leagues and it worked great. Apparently Yahoo has changed their system though, because I ended up with the exact same problem as Tim -- mainly, my bench has 7 backup qbs and nothing else. Definitely wouldn't trying this any more, it can really ruin your chances in the league.</p>
+
+<p>3 kickers on your bench >>>>> 7 backup qbs</p>
+		
+		
+	</div>
+
+	<div class="comment-reply" id="comment_response_3" style="display: none;"></div>
+
+
+</li>
+
+</ol>
+
+
+
+	<div class="comment-new">
+	<h2>write a new comment</h2>
+
+<form action="/articles/41694-fantasy-football-how-to-manipulate-a-yahoo-autopick-draft/comments" id="new_comment_form" method="post">
+	<textarea cols="40" id="comment_body" name="comment[body]" rows="20"></textarea><br />
+	<input id="post_comment_button" name="commit" type="submit" value="Submit comment" />
+</form>
+</div>
+
+
+</div>
+			
+		
+	</div>
+	
+	<div id="col2">
+		<div class="ad">
+  <script type="text/javascript">
+var federated_media_section = '';
+</script>
+<script type="text/javascript" src="http://static.fmpub.net/zone/
+1413"></script>
+</div>
+
+<script text="text/javascript" src="/javascripts/adclicks.js"></script>
+<script type="text/javascript">
+Event.observe(window, 'load', function() {
+	var element = $('ad_content');
+	if(element != null){
+		var name = element.getAttribute('name');
+		if(name != null){
+			var adclick = new Adclick();
+			adclick.attributes.name = name;
+			adclick.view();
+		}
+	}
+});
+</script>
+
+		
+		
+		<div id="article-options">
+			<a href="/accounts/new"><img src="/images/btn_edit-article.gif" alt="Edit this Article" /></a>
+			<a href="/accounts/new"><img src="/images/btn_article-history.gif" alt="Article History" /></a>
+		</div>
+		
+
+		
+    <div id="edited-status">
+      <a href="/about"><img src="/images/icon_article-unedited2.gif" /></a>
+    </div>
+    
+
+
+	
+	
+		
+	
+	
+	
+		<div id="about-the-author">
+			<h3>About the Author <strong><a href="/users/15749-Chris-Olley" class="author" target="_parent">Chris Olley</a> <small>(scribe)</small></strong></h3>
+			<div id="author-info">
+				<a href="/users/15749-Chris-Olley" class="author-photo"><img class='profile_photo' src='/images_root/user_pictures/0001/9682/biron_article_author.jpg'/></a>
+				<ul>
+					<li class="articles"><strong>9</strong> articles written</li>
+					<li class="comments"><strong>92</strong> comments posted</li>
+					<li class="fans"><strong>4</strong> fans</li>
+				</ul>
+			</div>
+			
+			<div id="author-articles">
+				<h3>Chris's recent articles</h3>
+				<ul>
+					
+								<li><a href="/articles/38656-how-comcast-could-build-philly-live-and-keep-the-wachovia-spectrum">How Comcast Could Build Philly Live! AND Keep The Wachovia Spectrum</a></a></li>
+					
+								<li><a href="/articles/31385-nhl-draft-flyers-shore-up-defense-for-both-present-and-future">NHL DRAFT: Flyers Shore Up Defense For Both Present and Future</a></a></li>
+					
+								<li><a href="/articles/30869-nhl-draft-with-the-27th-pick-in-the-draft-the-philadelphia-flyers-select">NHL Draft: With the 27th Pick in the Draft, the Philadelphia Flyers Select...</a></a></li>
+					
+				</ul>
+			</div>
+						
+			
+		</div>
+
+		
+			
+				
+		<style type="text/css">/* 4INFO widgets styles */
+#fiWidget { border:solid 1px #ddd; background:#f5f5f5; padding:6px; width:288px; margin:0 0 10px 0; color:#3f3f3f; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:1.4em; }
+#fiWidget form { margin:0; padding:0; }
+#fiWidget h2 { font-size:14px; margin:0 0 12px 0; }
+#fiWidget h3 { font-size:12px; margin:15px 0 12px 0; }
+#fiWidget h3, #fiMessage { padding:15px 0 0 0; border-top:solid 2px #e8e8e8; }
+#fiWidget ul { margin:12px 0 15px 15px; padding:0; }
+#fiWidget input { vertical-align:middle; }
+#fiWidget .clear, #fiPhone { clear:both; float:none; }
+#fiIntro li { margin:0 0 5px 0; }
+#fiWidget .fiMenu { margin-bottom:5px; }
+#fiWidget .fiMenu input { background:#fff; }
+#fiWidget .fiInput ul { list-style:none; margin:0; padding:0; }
+#fiWidget .fiInput select { width:175px; }
+#fiMsgTxt { margin:0 0 10px 0; }
+#fiMsgTxt .fiSuccess { color:green; }
+#fiMsgTxt .fiNotSet { color:red; }
+#fiConfirm h3 { border:none; padding-top:0; }
+#fiLinks { margin:18px 0 10px 0; }
+#fiPoweredBy { text-align:right; }
+#fiDisclaimer { font-size:9px; line-height:normal; color:#8c8c8c; }
+</style>
+
+<script type="text/javascript">if(typeof(_4INFO)!='object')document.write('<sc'+'ript src="http://4info.net/downloads/widgets/fastTrack_2_1_live.js"></sc'+'ript>');</script>
+<script type="text/javascript">
+var fiConfig = { widgetID:'188', runOnSuccess:null, runOnConfirm:null, runOnSubmit:null,
+	alerts:[{ type:_4INFO.SPORTS, usingTriggers:0, idSuffix:3, hide:{league:0,team:0}, defaults:{league:'', team:''} }]
+};
+_4i.MSG.NO_VALID_ALERT = 'Please choose a league, conference (if applicable), and team to continue.';
+_4INFO.initWidgets(fiConfig);
+</script>
+
+<div id="fiWidget">
+<div id="fiInputs">	
+    <div id="fiSports">
+        <h2>FREE SPORTS TEXT ALERTS</h2>
+        <ul><li>Get team scores and news sent to your cell phone during and after each game.</li><li>We do not charge for these services, but standard messaging rates or other charges apply.</li><li>Cancel anytime by replying STOP to any message.</li></ul>
+        <form action="" method="" onsubmit="_4INFO.setAlerts();return false;" style="margin:0" name="fiWidgetForm" id="fiWidgetForm">
+        <h3>Step 1: Choose a team</h3>
+        <div id="fiInput3" class="fiInput">
+            <div class="fiMenu" id="fiLeagueMenu3">League:<br /><select id="fiLeagueId3" name="fiLeagueId" onchange="_4INFO.leagueSelect(3);"><option value="-1">Choose one</option></select></div>
+            <div class="fiMenu" id="fiConferenceMenu3" style="display:none;">Conference:<br /><select id="fiConferenceId3" name="fiConfId" disabled="disabled" onchange="_4INFO.conferenceSelect(3);"><option value="-1">Choose one</option></select></div>
+            <div class="fiMenu" id="fiTeamMenu3" style="display:none;">Team:<br /><select id="fiTeamId3" name="fiTeamId" disabled="disabled"><option value="-1">Choose one</option></select></div>
+        </div>
+    </div>
+</div><!-- End fiInputs -->
+<div id="fiPhone">
+    <h3>Step 2: Enter your phone number</h3>
+    <div id="fiPhInput">( <input id="fiPh1" type="text" autocomplete="off" maxlength="3" style="width:25px" value="" onkeyup="_4INFO.tab(this,'fiPh',1,event);" /> ) <input id="fiPh2" type="text" autocomplete="off" maxlength="3" style="width:25px" value="" onkeyup="_4INFO.tab(this,'fiPh',2,event);" /> - <input id="fiPh3" type="text" autocomplete="off" maxlength="4" style="width:33px" value="" onkeyup="_4INFO.tab(this,'fiPh',3,event);" /> <input id="fiBtnContinue" type="submit" value="Continue" /></div>
+    <div id="fiPhTxt" style="display:none;">Confirmed Phone:<br /><span id="fiPhNo"></span> <a href="#" onclick="_4INFO.clear();return false">clear</a> <input id="fiBtnContinue2" type="submit" value="Continue" /></div></form>
+</div>
+<div id="fiConfirm" style="display:none;">
+    <form action="" method="" onsubmit="_4INFO.confirm();return false;" name="fiWidgetConfirmForm">
+    <h3>Step 3: Confirm your phone number</h3>
+    Enter the confirmation code that has been sent to your phone:<br />
+    <input id="fiConfCode" type="text" maxlength="5" size="15" /><br /><br />
+    <input id="fiBtnConfirm" type="submit" value="Confirm" style="margin-bottom:5px;" /></form><br />
+    <a id="fiResendLink" href="#" onclick="_4INFO.resendCode();return false;">Resend code</a> | <a href="#" onclick="_4INFO.cancel();return false">cancel</a>
+</div>
+<div id="fiMessage" style="display:none;">
+    <div id="fiMsgTxt"></div><div id="fiCreated">You can now <a href="#" onclick="_4INFO.setMoreAlerts();return false;">create additional alerts</a> without reconfirming your phone.</div>
+    <div id="fiNotCreated"><a href="#" onclick="_4INFO.setMoreAlerts();return false;">Click here</a> to go back and try again.</div>
+</div>
+<div id="fiDisclaimer"><div id="fiLinks"><a href="http://www.4info.net/support/faq.jsp#deletealert" target="_blank">Cancel Alerts</a> | <a href="http://www.4info.net/logon.jsp" target="_blank">Modify Alerts</a> | <a href="http://www.4info.net/privacy.jsp" target="_blank">Privacy Policy</a> | powered by <a href="http://4info.net">4INFO</a></div>Standard Messaging Rates or other charges apply. To Opt-out text STOP to 4INFO (44636). For more information text HELP to 4INFO (44636). Contact your carrier for more details.</div>
+</div><!-- End fiWidget -->
+		
+		
+		<div id="wanna-write">
+			<h3>Want to write for Bleacher Report</h3>
+			<p>We are a community of fans who write about sports. And we're growing.</p>
+			<p class="btn_learn-more"><a href="/accounts/new">Learn More and Sign Up &raquo;</a></p>
+		</div>
+		
+	</div>
+</div>
+
+      
+
+			<div id="footer">
+				<div id="footer-inner">
+				
+					<div class="column" id="more-sections">
+	<h4>The Rest</h4>
+	<ul>
+		
+		<li><a href="/humor">Humor</a></li>
+		
+		<li><a href="/beyond-the-bleachers">Interviews </a></li>
+		
+		<li><a href="/fantasy">Fantasy</a></li>
+		
+		<li><a href="/cricket">Cricket</a></li>
+		
+		<li><a href="/rugby">Rugby</a></li>
+		
+		<li><a href="/boxing">Boxing</a></li>
+		
+		<li><a href="/cfl">CFL</a></li>
+		
+	</ul>
+</div>
+					<div class="column" id="top-teams">
+	<h4>Popular Teams</h4>
+	<ul>
+		
+			<li><a href="/New-York-Yankees">New York Yankees</a></li>
+		
+			<li><a href="/Boston-Red-Sox">Boston Red Sox</a></li>
+		
+			<li><a href="/Manchester-United">Manchester United</a></li>
+		
+			<li><a href="/New-England-Patriots">New England Patriots</a></li>
+		
+			<li><a href="/New-York-Mets">New York Mets</a></li>
+		
+			<li><a href="/Chicago-Cubs">Chicago Cubs</a></li>
+		
+	</ul>
+</div>
+				
+
+					<div class="column" id="useful-links">
+						<h4>Useful Links</h4>
+						<ul>
+							
+								<li><a href="/top-writers">Top Writers</a></li>
+								<li id="nav_learn-more"><a href="/learn_more">Learn More</a></li>
+								<li id="nav_register"><a href="/accounts/new">Register</a></li>
+								<li id="nav_sign-in"><a href="/accounts/login">Sign In</a></li>
+							
+						</ul>
+					</div>
+
+					<div class="column" id="sitemap">
+						<h4>Sitemap</h4>
+						<ul>
+							<li><a href="/">Front Page</a></li>
+							<li><a href="/about">About Bleacher Report</a></li>
+							<li><a href="http://blog.bleacherreport.com">Bleacher Report Blog</a></li>
+							<li><a href="/pages/press-room">Press Room</a></li>
+							<li><a href="http://bleacherreport.com/articles/feed">Subscribe</a></li>
+							<li><a href="/pages/contact">Contact Us</a></li>
+							<li><a href="/faq">FAQ</a></li>
+						</ul>
+					</div>
+
+					<div class="column" id="byline">
+						<h4>Bleacher Report. The Open Source Sports Network</h4>
+						<p>Copyright 2008 Bleacher Report, Inc. All Rights Reserved.</p>
+						<ul>
+							<li><a href="/pages/terms">Terms of Use</a></li>
+							<li><a href="/pages/privacy">Privacy Policy</a></li>
+							<li><a href="/pages/advertise">Advertise</a></li>
+							<li><a href="/pages/comguidelines">Community Guidelines</a></li>
+						</ul>
+					</div>
+				</div>
+				
+			</div>
+			
+			<div id="partners">
+				<span><img src="/images/official_partner_cbs.gif" /></a></span>
+			</div>
+		</div>
+	
+	    <script type="text/javascript">
+	    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	    </script>
+	    <script type="text/javascript">
+	    var pageTracker = _gat._getTracker("UA-432905-1");
+	    pageTracker._initData();
+	    pageTracker._trackPageview();
+	    </script>
+	
+	
+	<script type='text/javascript' src='http://static.fmpub.net/site/bleacherreport'></script>
+	        <script src="http://services.nuconomy.com/n.js" type="text/javascript"></script>
+        <script type="text/javascript">NUCONOMY.ProjectToken = "09e931e4-6b";</script>
+        <script type="text/javascript">
+        Event.observe(window, 'load', function() {
+          NUCONOMY.Logger.LogActivity( "", "15749", "http://bleacherreport.com/articles/41694", "1", "");
+        });
+        </script>
+
+
+	
+</body>
+</html>

@@ -1,0 +1,12 @@
+*.lastparsed
+*.log
+*.tmp
+*.gz
+*.tar
+*.out
+cache*
+.svn
+*.tmp
+*.srbak
+*.bak
+

@@ -1,0 +1,36 @@
+#!/bin/sh
+#Usage: $0 <LINE NUM> <FILE1>,<FILE2>,etc...
+
+if [ "$1" == "" ];then
+	me=`basename $0`
+	cat << STOP
+DESCRIPTION
+	Purpose: When js files are loaded with the combiner, 
+	and you find an error at a line number, this script
+	will tell you which file its in
+	
+SYNOPSIS
+	$me <line_number> <filename>,<filename>,...
+
+EXAMPLE
+	$me 1315 ga.config.js,ga.Vyewbooks.js,ga.FolderTree.js
+
+STOP
+exit
+fi
+
+targLine=$1
+files=$2
+
+for f in `echo "$files"|tr "," " "`; do 
+	if [ -f $f ];then
+		lines=`wc -l $f|awk '{print $1}'`
+		if [ $targLine -lt $lines ];then
+			echo "$f LINE $targLine";
+			vim $f +$targLine
+			exit;
+		fi
+		targLine=`expr $targLine - $lines`
+	fi
+done
+

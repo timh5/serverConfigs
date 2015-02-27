@@ -1,0 +1,31 @@
+#!/bin/sh
+
+MROOT=/var/qmail/mailnames
+HROOT=/var/www/vhosts
+
+HREMROOT=/home/httpd/vhosts
+
+DOM=$1
+
+LOCSIZE=`du -s $HROOT/$DOM`
+REMSIZE=`ssh pr1.simmeeting.com du -s $HREMROOT/$DOM`
+LOCHSIZE=`du -sh $HROOT/$DOM`
+
+echo "HTTP SIZE:"
+echo "Local: $LOCHSIZE"
+echo "Local: $LOCSIZE"
+echo "Remot: $REMSIZE"
+echo ""
+
+if [ $REMSIZE -ne $LOCSIZE ];then
+	echo "Remote files differ"
+fi
+
+cd $HROOT/$DOM
+#syncoldhttp $2
+cd -
+
+cd $MROOT/$DOM
+syncoldmail $2
+cd -
+

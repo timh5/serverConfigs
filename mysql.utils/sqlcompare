@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Compare same query on both servers
+# Usage: sqlcompare <dbpass> "select count(*) from exp_weblog_data"
+
+if [ "$1" == "" ];then
+	echo 'Usage: sqlcompare <dbpass> "select count(*) from exp_weblog_data"';
+	exit
+fi
+
+pw=$1
+
+echo "--- DB WEB1 ---"
+h=db.web1
+mysql -p$pw ee_vyew -h$h -e"$2 $3 $4 $5 $6 $7 $8 $9 $10"
+
+
+echo "--- DB WEB2 ---"
+h=db.web2
+mysql -p$pw ee_vyew -h$h -e"$2 $3 $4 $5 $6 $7 $8 $9 $10"

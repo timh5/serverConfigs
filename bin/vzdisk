@@ -1,0 +1,7 @@
+echo -n "ID "
+df -h|head -n1
+for i in `vzlist |sed -e 's/  */ /g'|cut -f2 -d" "|grep -v VEID| grep -v CTID`; do
+  echo -n "$i "
+  vzctl exec $i df -h $*|grep simfs
+done
+

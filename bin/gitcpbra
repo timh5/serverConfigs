@@ -1,0 +1,31 @@
+#!/bin/sh
+# Copy all branches from one remote to another
+if [ "$1" == "" ];then
+	echo "Usage: gitcpbr dest_remote [src_remote=origin]"
+	exit 255
+fi
+
+DEST=$1
+BR=$2
+
+if [ "$SRC" == "" ];then
+	SRC="origin"
+fi
+
+
+# get list of remote branches
+#git branch -r | grep -v HEAD | grep origin
+
+branches=`git branch -r | grep -v HEAD | grep "$SRC"  | sed -r "s/$SRC.//"`
+
+for BR in $branches;do
+	git push "$DEST" remotes/$SRC/$BR:refs/heads/$BR
+done
+
+
+#[sub8:deskshare.git]git push codeplane remotes/origin/dave:refs/heads/dave
+
+
+
+#git push "$DEST" remotes/$SRC/$BR:refs/heads/$BR
+

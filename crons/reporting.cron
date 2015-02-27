@@ -1,0 +1,30 @@
+
+## Dashboard stats
+#12 */3 * * * root /usr/bin/php  /var/www/html/reporting/dashboard/cron.php
+
+#* * * * * root	/bin/sh /opt/vyew/mysql.utils/logprocs.sh
+
+
+## Backup database: FULL twice a week, INCR and EE db, every night
+3 0 * * *  root /bin/sh /vyew_db_backups/backup-blogs.sh
+
+
+#13 0 * * *  root /bin/sh /vyew_db_backups/mybackup.sh incr
+# Full takes about 4.5-5hrs hrs: Sunday at 2am
+#3 2 * * 0    root /bin/sh /vyew_db_backups/mybackup.sh full	
+
+
+## CLEANER:
+#Clean users,collections and books every night around 3am (could run 2hrs), 
+#except Sundays when full backup goes
+#10 1 * * 1,2,3,4,5,6 root /bin/cp /data/vyew_cleaner/nightlyrun.out /data/vyew_cleaner/lastrun.nightlyrun.out -f
+#15 1 * * 1,2,3,4,5,6 root /usr/bin/php /data/vyew_cleaner/cleandb -Cbcuo -x -hdb.rpt -w dbwrite -m30 > /data/vyew_cleaner/nightlyrun.out 2>&1
+
+#15 20 * * 1,2,3,4,5,6 root /bin/sh /data/vyew_cleaner/nightly.cleanloop.sh 25  2>&1
+
+#0 19 * * *  root /usr/bin/php /data/vyew_cleaner/cleandb -Cc -S4541150 -x -hdb.rpt -w dbwrite -m18 -f > /data/vyew_cleaner/nightlyrun.out
+
+#30 19 * * * root /usr/bin/php /data/vyew_cleaner/cleandb -T -Cc -S4632430 -x -hdb.rpt -w dbwrite -m4  > /data/vyew_cleaner/nightlyrun2.out
+
+#0 6 * * * root /bin/sh /data/vyew_cleaner/killx.sh
+
