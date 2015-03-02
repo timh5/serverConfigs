@@ -42,5 +42,5 @@ fi
 
 
 cd ~/
-ln -s $mydir
+[ ! -e $mydir ] && ln -s $mydir
 

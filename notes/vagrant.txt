@@ -1,0 +1,5 @@
+http://hakunin.com/six-ansible-practices
+
+vagrant plugin install vagrant-hostsupdater
+
+
