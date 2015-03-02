@@ -44,3 +44,4 @@ fi
 cd ~/
 [ ! -e $mydir ] && ln -s $mydir
 
+exit 0

@@ -1,14 +1,13 @@
 #!/bin/sh
 #Add this line to ~/.bash_profile
-#[ -f /opt/vyew/.bash_profile ] && source /opt/vyew/.bash_profile
+#[ -f /path/to/dir.bash_profile ] && source /path/to/.bash_profile
+
+MYDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 #Git auto completions
-source /opt/vyew/.git-completion.sh
-source /opt/vyew/misc/z.sh
+source $MYDIR/.git-completion.sh
+source $MYDIR/misc/z.sh
 
-#vz shortcuts
-alias vzc='vzctl enter'
-alias vzl='vzlist -o veid,hostname,kmemsize,kmemsize.l,privvmpages,physpages,numtcpsock,numflock,numfile'
 
 #alias t='todo -d /root/svn.tim/todo/todo.cfg'
 
@@ -29,7 +28,6 @@ alias gdif='git diff'
 #misc
 alias ll='ls -l'
 alias tp='tail -f /var/log/php.log'
-alias tps='tail -f /var/log/vyew/secLog.log'
 alias tailp='tail -f /var/log/php.log'
 alias duh='du -h --max-depth=1'
 alias duhk='du -h --max-depth=1|grep -vE "^[0-9.]{1,3}K"'
@@ -45,7 +43,7 @@ alias psa='ps aux | grep'
 alias svnstu='svn st -u | grep -v ^?'
 alias svnst='svn st | grep -v ^?'
 
-PATH=$PATH:/opt/vyew/bin:/opt/vyew/mysql.utils
+PATH=$PATH:$MYDIR/bin
 export PATH
 
 
