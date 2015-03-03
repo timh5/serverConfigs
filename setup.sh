@@ -3,6 +3,13 @@
 # Creates local links for .dot files into ~/
 #
 
+# because ubuntu uses ~/.profile, not .bash_profile
+if [ "$1" == "" ];then
+	profileFileName=.bash_profile
+else
+	profileFileName=$1
+fi
+
 
 cd `dirname $0`
 mydir=$PWD
@@ -29,15 +36,15 @@ linkfile ~/.screenrc
 
 
 ## setup .bash_profile
-if [ -e ~/.bash_profile ];then
+if [ -e ~/$profileFileName ];then
 	## Check if line exists
-	tmp=`cat ~/.bash_profile | grep "\-f.$mydir"`
+	tmp=`cat ~/$profileFileName | grep "\-f.$mydir"`
 	if [ $? != 0 ];then
-		echo "[ -f $mydir/.bash_profile ] && . $mydir/.bash_profile" >> ~/.bash_profile
+		echo "[ -f $mydir/$profileFileName ] && . $mydir/$profileFileName" >> ~/$profileFileName
 	fi
 
 else
-	echo "[ -f $mydir/.bash_profile ] && . $mydir/.bash_profile" >> ~/.bash_profile
+	echo "[ -f $mydir/$profileFileName ] && . $mydir/$profileFileName" >> ~/$profileFileName
 fi
 
 
