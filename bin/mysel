@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # mysql select helper
 
 if [ ! $1 ];then

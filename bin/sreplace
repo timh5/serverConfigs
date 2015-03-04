@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Interactive search replace in multiple files
 # Author: timh@vyew.com
 #   - prompts you before replacing in files

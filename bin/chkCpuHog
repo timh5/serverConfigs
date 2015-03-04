@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Check if a process is taking over a certain CPU for a given time
 # NOTE: This program assumes it will be run from cron in about 5 min or 10 min intervals
 # Usage:  	chkCpuHog <command_string> [max_time_mins]

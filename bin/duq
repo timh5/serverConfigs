@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Like du, but quicker
 # Usage: du [-nr] = not recursive
 

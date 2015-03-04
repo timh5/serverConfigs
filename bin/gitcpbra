@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copy all branches from one remote to another
 if [ "$1" == "" ];then
 	echo "Usage: gitcpbr dest_remote [src_remote=origin]"

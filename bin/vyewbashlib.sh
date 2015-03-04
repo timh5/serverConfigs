@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # USAGE: source /opt/vyew/bin/vyewbashlib.sh
 # then... now=`nowiso`
 

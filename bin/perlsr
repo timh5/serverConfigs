@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #Example: perl -pi -w -e 's/Search/Replace/g;' *.php
 [ ! $1 ] && echo "Usage: perlsw 's/Search/Replace/g;' filespec"

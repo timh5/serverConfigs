@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 pw=$1
 sid=$2

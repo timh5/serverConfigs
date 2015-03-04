@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Usage: cvd [vN.MM|MM]
 # 	Changes directory path from one version to another, preserving relate wording dir,
 #Example:

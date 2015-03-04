@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Merges many lines into one line, separated by ";" or given symbol
 # USage: cat file | mergelines [-s SEPERATOR] [-bN] 
 #		-b divide in blocks of N

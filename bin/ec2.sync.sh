@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # simple syncing script
 # usage: dont.sync.sh [-n|-c|-h]

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # USAGE: source /root/svn.tim/bin/timlib.sh
 
 function nowiso {

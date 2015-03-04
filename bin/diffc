@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Colored diff
 # Usage: diffc file1 file2  -- diff 2 files

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #epoch2utc 1299918754  ---  returns GMT
 #epoch2utc 1299918754 pst ---  returns Pacific time
 

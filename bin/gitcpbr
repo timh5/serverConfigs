@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copy a branch from one remote to another
 # Usage gitcpbr src_remote dest_remote branch
 if [ "$2" == "" ];then
