@@ -1,0 +1,28 @@
+---
+    # incoming vars from Vagrant file:
+    #   hostname
+    #   ipaddress
+
+- hosts: vyew-mains
+  sudo: true
+
+  vars:
+  #  rootdir: /vagrant    # Todo - make this dynamic when installing config.local.php
+
+
+ # roles:
+  #  - init
+ #   - apache
+
+
+  tasks:
+    - name: Hostname Test
+      script: files/test.sh {{ inventory_hostname }}
+      register: out
+      tags: test
+
+    - debug: var=out.stdout_lines
+      tags: test
+
+
+

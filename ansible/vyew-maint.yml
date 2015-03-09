@@ -1,0 +1,40 @@
+---
+#
+#  Turn Vyew Maintenance ON or OFF
+#  Usage:
+#		Turn ON maintenance mode to basic page
+#  		ansible-playbook vyew-main.yml -e maint=basic
+#
+#		Turn ON maintenance mode to index page
+#  		ansible-playbook vyew-main.yml -e maint=index
+#
+#		Turn OFF maintenance mode
+#  		ansible-playbook vyew-main.yml -e maint=off
+#
+#		Turn ON maintenance mode with a message
+#  		ansible-playbook vyew-main.yml -e "maint=on msg='We will be down for mainteance for 3hrs'"
+#
+
+- hosts: vyew-www
+  sudo: true
+
+  tasks:
+    - fail: Incoming vars not set!!!!
+      when: maint is not defined 
+
+    - name: Hostname Test
+      script: files/test.sh {{ inventory_hostname }}
+      register: out
+      tags: test
+
+    - debug: var=out.stdout_lines
+      tags: test
+
+
+#  on-basic: set header at top of mainteennace/basic, maintenance/index, /maint.php
+#  sycndir in maintenance, and maint.php
+#
+#
+#
+#
+#
