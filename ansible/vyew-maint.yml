@@ -2,39 +2,44 @@
 #
 #  Turn Vyew Maintenance ON or OFF
 #  Usage:
-#		Turn ON maintenance mode to basic page
-#  		ansible-playbook vyew-main.yml -e maint=basic
+#		Get maintenance mode STATUS
+#		ansible-playbook vyew-maint -e cmd=status
 #
-#		Turn ON maintenance mode to index page
-#  		ansible-playbook vyew-main.yml -e maint=index
+#		Turn ON maintenance mode to basic page
+#  		ansible-playbook vyew-maint.yml -e cmd=basic
+#
+#		Turn ON maintenance mode to index page,
+#			add a message to the index page, 
+#			and change the message to the banner
+#  		ansible-playbook vyew-maint.yml -e cmd=index msg='We are down for maintenance'
 #
 #		Turn OFF maintenance mode
-#  		ansible-playbook vyew-main.yml -e maint=off
+#  		ansible-playbook vyew-maint.yml -e cmd=off
 #
-#		Turn ON maintenance mode with a message
-#  		ansible-playbook vyew-main.yml -e "maint=on msg='We will be down for mainteance for 3hrs'"
+#		Turn ON banner message only
+#  		ansible-playbook vyew-maint.yml -e "maint=on msg='We will be down for mainteance for 3hrs'"
 #
 
 - hosts: vyew-www
   sudo: true
+  gather_facts: false
 
-  tasks:
-    - fail: Incoming vars not set!!!!
-      when: maint is not defined 
+  pre_tasks:
+    - fail: Incoming CMD var set ???
+      when: cmd is not defined 
 
     - name: Hostname Test
       script: files/test.sh {{ inventory_hostname }}
       register: out
       tags: test
+      when: cmd=="test"
 
     - debug: var=out.stdout_lines
       tags: test
+      when: cmd=="test"
 
 
-#  on-basic: set header at top of mainteennace/basic, maintenance/index, /maint.php
-#  sycndir in maintenance, and maint.php
-#
-#
-#
-#
-#
+  roles:
+    - { role: vyew-check-maint, when: cmd=="status" }
+
+

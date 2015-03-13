@@ -1,9 +1,17 @@
 
 [vyew-main]
-ph1hn1.vyew.com ctid=25
+ph1hn1.vyew.com
 ph1hn2.vyew.com 
 
 
 [vyew-www]
-ph1hn1.vyew.com ansible_connection=ssh-openvz http_port=99 ctid=25 ansible_ssh_ctid=25
+www1.ph1hn1.vyew.com
+www1.ph1hn2.vyew.com
+
+
+[vyew-wowza]
+av9.vyew.com
+av10.vyew.com
+av11.vyew.com
+
 
