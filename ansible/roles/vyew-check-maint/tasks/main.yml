@@ -1,0 +1,13 @@
+---
+- name: Check if MAINT MODE
+  script: chkMaint.sh
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Check if a banner is set
+  script: chkBanner.sh
+  register: out
+
+- debug: var=out.stdout_lines
+  
