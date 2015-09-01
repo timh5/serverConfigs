@@ -17,6 +17,11 @@ alias egrep='egrep --colour'
 alias grepr='egrep * -R --colour --exclude="*svn*" -e '
 alias greps='egrep --colour --exclude="*svn*" '
 
+# setup vi as vim
+vimloc=`whereis vim|sed -r 's/^vim: ([^ ]+).*/\1/'`
+[ "$vimloc" != "" ] && alias vi="$vimloc";
+
+
 #git stuff
 alias gits='git status'
 alias gita='git add'
