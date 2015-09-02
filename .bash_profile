@@ -32,8 +32,6 @@ alias gdif='git diff'
 
 #misc
 alias ll='ls -l'
-alias tp='tail -f /var/log/php.log'
-alias tailp='tail -f /var/log/php.log'
 alias duh='du -h --max-depth=1'
 alias duhk='du -h --max-depth=1|grep -vE "^[0-9.]{1,3}K"'
 
