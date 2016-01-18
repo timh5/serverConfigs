@@ -1,0 +1,16 @@
+#this replaces vi, so that after saving a php, that file is checked for syntax errors
+# alias vi='/path/to/this/file/vi'
+#!/bin/sh
+
+/usr/bin/vim "$@"
+if [[ $1 =~ php$ ]]; then
+    tmp=`php -l $1`
+    if [ $? != 0 ];then
+        echo ""
+        echo ""
+        echo ""
+        tail -n10 /var/log/php.log
+        echo "^^^ ERRORS IN PHP FILE $1 ^^^"
+    fi
+fi
+
