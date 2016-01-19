@@ -9,7 +9,7 @@ if [[ $1 =~ php$ ]]; then
         echo ""
         echo ""
         echo ""
-        tail -n10 /var/log/php.log
+		  php -l $1
         echo "^^^ ERRORS IN PHP FILE $1 ^^^"
     fi
 fi
