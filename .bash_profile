@@ -1,6 +1,7 @@
 #!/bin/sh
 #Add this line to ~/.bash_profile
-#[ -f /path/to/dir.bash_profile ] && source /path/to/.bash_profile
+#TDIR=/path/to/this/dir
+#[ -f $TDIR/.bash_profile ] && source $TDIR/.bash_profile
 
 MYDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
@@ -16,10 +17,7 @@ alias grep='grep --colour'
 alias egrep='egrep --colour'
 alias grepr='egrep * -R --colour --exclude="*svn*" -e '
 alias greps='egrep --colour --exclude="*svn*" '
-
-# setup vi as vim
-vimloc=`whereis vim|sed -r 's/^vim: ([^ ]+).*/\1/'`
-[ "$vimloc" != "" ] && alias vi="$vimloc";
+alias vi="$MYDIR/bin/vi"
 
 
 #git stuff
@@ -32,8 +30,6 @@ alias gdif='git diff'
 
 #misc
 alias ll='ls -l'
-alias tp='tail -f /var/log/php.log'
-alias tailp='tail -f /var/log/php.log'
 alias duh='du -h --max-depth=1'
 alias duhk='du -h --max-depth=1|grep -vE "^[0-9.]{1,3}K"'
 
