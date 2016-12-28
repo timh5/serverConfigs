@@ -1,6 +1,7 @@
 #!/bin/sh
 #Add this line to ~/.bash_profile
-#[ -f /path/to/dir.bash_profile ] && source /path/to/.bash_profile
+#TDIR=/path/to/this/dir
+#[ -f $TDIR/.bash_profile ] && source $TDIR/.bash_profile
 
 MYDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
@@ -16,6 +17,7 @@ alias grep='grep --colour'
 alias egrep='egrep --colour'
 alias grepr='egrep * -R --colour --exclude="*svn*" -e '
 alias greps='egrep --colour --exclude="*svn*" '
+alias vi='/home/tim/serverConfigs/bin/vi'
 
 #git stuff
 alias gits='git status'
