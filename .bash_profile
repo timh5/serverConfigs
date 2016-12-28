@@ -17,11 +17,7 @@ alias grep='grep --colour'
 alias egrep='egrep --colour'
 alias grepr='egrep * -R --colour --exclude="*svn*" -e '
 alias greps='egrep --colour --exclude="*svn*" '
-alias vi='/home/tim/serverConfigs/bin/vi'
-
-# setup vi as vim
-vimloc=`whereis vim|sed -r 's/^vim: ([^ ]+).*/\1/'`
-[ "$vimloc" != "" ] && alias vi="$vimloc";
+alias vi="$MYDIR/bin/vi"
 
 
 #git stuff
