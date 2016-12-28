@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #converts given file or dir to ownership and rread/write rights
 
 if [ "$1" == "" ];then

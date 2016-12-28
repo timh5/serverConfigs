@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # (c) Copyright by Wolfgang Fuschlberger
 #
@@ -268,7 +268,7 @@ Not entered yes. Exiting...."
 fi
 else
   echo "Creating $SHELL"
-  echo '#!/bin/sh' > $SHELL
+  echo '#!/bin/bash' > $SHELL
   echo "`which sudo` `which chroot` $JAILPATH /bin/su - \$USER" \"\$@\" >> $SHELL
   chmod 755 $SHELL
 fi

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Sum together numbers piped in
 # Usage: cat list.of.numbers | numsum <column#>
 # prints total of that column

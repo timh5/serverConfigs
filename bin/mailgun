@@ -1,0 +1,32 @@
+#!/bin/bash
+
+cd `dirname $0`
+
+conf=~/.mailgun.conf
+[ -e $conf ] && source $conf;
+
+if [ ! -e $confg ] || [ "$apikey" == "" ] || [ "$domain" == "" ];then
+	echo "Cant find settings in $conf"
+	echo "File should contain values::"
+	echo "apikey=XXXXXXX"
+	echo "domain=mydomain.com"
+	exit 1
+fi
+
+
+from=`hostname`
+to=$1
+subj=$2
+[ "$subj" == "" ] && subj=''
+
+if [ "$to" == "" ];then
+	echo "Usage: mailgun to@email.address.com 'some message here'"
+	exit 1
+fi
+
+curl -s --user "api:$apikey" \
+    https://api.mailgun.net/v2/$domain/messages \
+    -F from="$from <$from@$domain>" \
+    -F to=$to \
+    -F subject=$subj \
+    -F text=$subj

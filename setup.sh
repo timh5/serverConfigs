@@ -51,4 +51,8 @@ fi
 cd ~/
 [ ! -e $mydir ] && ln -s $mydir
 
+echo "PATH=$PATH:$mydir/bin" > /tmp/timpath
+echo "export PATH" >> /tmp/timpath
+source /tmp/timpath
+
 exit 0

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 LOG=/var/log/mysqlprocs.log
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 git status --porcelain|grep '^ M'|grep swf$|awk '{print $2}'|xargs git co 
 git status --porcelain|grep '^ M'|grep swz$|awk '{print $2}'|xargs git co 

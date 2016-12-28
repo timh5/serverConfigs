@@ -1,0 +1,7 @@
+#
+was working on getting vyew to setup a maint page.
+... was going to create a new connection plugin .. for this
+but i cant get the host vars passed into the connection plugin
+
+
+

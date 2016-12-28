@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Resize image file smaller, if over certain size
 #vnconv <imgname>
 SIZE_THRESH=100000;

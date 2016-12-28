@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Usage: $0 <LINE NUM> <FILE1>,<FILE2>,etc...
 
 if [ "$1" == "" ];then

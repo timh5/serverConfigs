@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Convert UTC date format to epoch time (seconds past 1970)
 # Examples:
 # utc2epoch "2011-01-01 05:04:00"  --  treats date as GMT

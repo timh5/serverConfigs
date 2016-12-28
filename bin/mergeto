@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Merge helper: merges current working directories' svn branch 
 # into another vyew  app version branch with given rev number
 # Can be used in 2 ways, pipe output from svn commit, or called

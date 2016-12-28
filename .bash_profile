@@ -19,6 +19,11 @@ alias grepr='egrep * -R --colour --exclude="*svn*" -e '
 alias greps='egrep --colour --exclude="*svn*" '
 alias vi='/home/tim/serverConfigs/bin/vi'
 
+# setup vi as vim
+vimloc=`whereis vim|sed -r 's/^vim: ([^ ]+).*/\1/'`
+[ "$vimloc" != "" ] && alias vi="$vimloc";
+
+
 #git stuff
 alias gits='git status'
 alias gita='git add'
@@ -29,8 +34,6 @@ alias gdif='git diff'
 
 #misc
 alias ll='ls -l'
-alias tp='tail -f /var/log/php.log'
-alias tailp='tail -f /var/log/php.log'
 alias duh='du -h --max-depth=1'
 alias duhk='du -h --max-depth=1|grep -vE "^[0-9.]{1,3}K"'
 
