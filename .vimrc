@@ -78,24 +78,7 @@ map _dd odbd(  );<LEFT><LEFT><LEFT><LEFT>
 
 map _tr <UP>A<CR>try{<ESC><DOWN>A<CR>}catch(Exception $e){error_log($e->getMessage();}
 
-		x
 
-
-"   Javascript macros
-map _jd odbg("");<LEFT><LEFT><LEFT>
-map _jf odbd("");<LEFT><LEFT><LEFT>
-
-" 	Commenting
-"cmap cb  ! sed 's/^/\/\//'o
-"cmap uc :'<,'> ! sed 's/^\/\///'
-" }}} MACROS
-
-
-" comments
-"map __c mz^i//<ESC>`z
-"map __C mz^2x`z
-"vmap __c <ESC>`<i/*<ESC>`>a*/<ESC>
-"vmap __C <ESC>`<2x`>h2x
 
 
 
