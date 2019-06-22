@@ -41,25 +41,18 @@ set showmatch
 "   v - immediately after c, tab the block out one time
 "   e - error_log
 "   r - errorlog with print_r, for variable mapping
+"   tr - add a try() catch
 
 
-"	.qq - convert to qfetch, and thats it
-"   .qs - convertQuery to qfetch str
-"	.qi - to qfetch int
-"	.qe - replace to qexec
-"	.qei - replace to qexec
 "	.r' - replace quoted $var as ?
 "   .ri - replace quoted int $var
 "	.re - replace quoted int $var at end of line
-map .qq  f><RIGHT>vf(<LEFT>diqfetch<ESC>
-map .qs  f><RIGHT>vf(<LEFT>diqfetch<ESC><RIGHT>f)i,'str',array($)<ESC>
-map .qi  f><RIGHT>vf(<LEFT>diqfetch<ESC><RIGHT>f)i,'int',array($)<ESC>
-map .qe  f><RIGHT>vf(<LEFT>diqexec<ESC><RIGHT>f)i,'str',array($)<ESC>
-map .qei  f><RIGHT>vf(<LEFT>diqexec<ESC><RIGHT>f)i,'int',array($)<ESC>
 
 map	.q'	f$<LEFT>_W<LEFT>vF$di?<ESC><RIGHT>
 map	.qr	f$i?<ESC><RIGHT>vf <LEFT>d
 map	.ql	f$i?<ESC><RIGHT>vf;<LEFT><LEFT>d
+
+
 "						'$asdf' , '$asdf', '$asdf'  
 
 
@@ -82,6 +75,11 @@ map _e oerror_log(" ");<LEFT><LEFT><LEFT><LEFT>
 map _r oerror_log(print_r(   ,true));<LEFT><LEFT><LEFT><LEFT><LEFT><LEFT><LEFT><LEFT><LEFT><LEFT>
 map _d odbg(" ");<LEFT><LEFT><LEFT><LEFT>
 map _dd odbd(  );<LEFT><LEFT><LEFT><LEFT>
+
+map _tr <UP>A<CR>try{<ESC><DOWN>A<CR>}catch(Exception $e){error_log($e->getMessage();}
+
+		x
+
 
 "   Javascript macros
 map _jd odbg("");<LEFT><LEFT><LEFT>

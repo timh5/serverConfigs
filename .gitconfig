@@ -44,3 +44,5 @@
 [rerere]
 	autoupdate = true
 	enabled = true
+[push]
+	default = matching
