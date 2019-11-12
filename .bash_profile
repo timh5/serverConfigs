@@ -5,6 +5,26 @@
 
 MYDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+
+## For Gnu Screen, display hostname in window title
+if [ "$PS1" ]; then
+  if [ -z "$PROMPT_COMMAND" ]; then
+    case $TERM in
+    screen*)
+      #if [ -e /etc/sysconfig/bash-prompt-screen ]; then
+      #    PROMPT_COMMAND=/etc/sysconfig/bash-prompt-screen
+      #else
+          #PROMPT_COMMAND='printf "\033k%s@%s:%s\033\\" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+          #PROMPT_COMMAND='printf "\033k%s@%s:%s\033\\" "${USER}" "${HOSTNAME%%.*}"'
+          PROMPT_COMMAND='printf "\033k%s@%s:%s\033\\" "${USER}" "${HOSTNAME}"'
+      #fi
+      ;;
+    esac
+  fi
+fi
+
+
+
 #Git auto completions
 source $MYDIR/.git-completion.sh
 source $MYDIR/misc/z.sh
