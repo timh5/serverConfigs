@@ -25,6 +25,11 @@ fi
 
 
 
+# don't put duplicate lines in the history. See bash(1) for more options
+# ... or force ignoredups and ignorespace
+HISTCONTROL=ignoredups:ignorespace
+
+
 #Git auto completions
 source $MYDIR/.git-completion.sh
 source $MYDIR/misc/z.sh
